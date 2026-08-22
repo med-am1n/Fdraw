@@ -17,7 +17,10 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
-GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb, GLFWcursorposfun mouse_cb, GLFWscrollfun scroll_cb);
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods);
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+GLFWwindow *startGLFW(int width, int height, const char *title,GLFWframebuffersizefun fb_cb, GLFWmousebuttonfun button_cb,  GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
 unsigned int LoadTexture(const char *path);
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -33,7 +36,7 @@ int main()
 
     glfwInit();
 
-    GLFWwindow *window = startGLFW(SCR_WIDTH, SCR_HEIGHT, "Fdraw", framebuffer_size_callback, mouse_callback, scroll_callback);
+    GLFWwindow *window = startGLFW(SCR_WIDTH, SCR_HEIGHT, "Fdraw",framebuffer_size_callback ,mouse_button_callback, cursor_position_callback, key_callback);
 
     if (!window)
         return -1;
@@ -84,7 +87,11 @@ int main()
     return 0;
 }
 
-GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb, GLFWcursorposfun mouse_cb, GLFWscrollfun scroll_cb)
+GLFWwindow *startGLFW(int width, int height, const char *title, 
+                    GLFWframebuffersizefun fb_cb,
+                    GLFWmousebuttonfun button_cb, 
+                    GLFWcursorposfun mouse_cb, 
+                    GLFWkeyfun key_cb)
 {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -104,9 +111,9 @@ GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffers
 
     glfwMakeContextCurrent(window);
 
-    glfwSetFramebufferSizeCallback(window, fb_cb);
+    glfwSetMouseButtonCallback(window, button_cb);
     glfwSetCursorPosCallback(window, mouse_cb);
-    glfwSetScrollCallback(window, scroll_cb);
+    glfwSetKeyCallback(window, key_cb);
 
     return window;
 }
@@ -168,14 +175,33 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-// glfw: whenever the mouse moves, this callback is called
-// -------------------------------------------------------
-void mouse_callback(GLFWwindow *window, double xposIn, double yposIn)
-{
-}
-
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 // ----------------------------------------------------------------------
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
+}
+
+void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+{
+	if (button == GLFW_MOUSE_BUTTON_LEFT)
+	{
+		if (action == GLFW_PRESS)
+		{
+			std::cout << "left mouse is pressed" << std::endl;
+		}
+		else if (action == GLFW_RELEASE)
+		{
+			std::cout << "left mouse is released" << std::endl;
+		}
+	}
+}
+void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+{
+	std::cout << "cursor position:( " << xpos << ", " << ypos << " )" << std::endl;
+}
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+	{
+		std::cout << "key pressed: " << key << std::endl;
+	}
 }
