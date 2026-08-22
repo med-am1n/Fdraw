@@ -22,6 +22,7 @@ void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 GLFWwindow *startGLFW(int width, int height, const char *title,GLFWframebuffersizefun fb_cb, GLFWmousebuttonfun button_cb,  GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
 unsigned int LoadTexture(const char *path);
+std::vector<float> CreateCircle(float centerX, float centerY, float radius, int res);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -204,4 +205,27 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 	{
 		std::cout << "key pressed: " << key << std::endl;
 	}
+}
+
+
+std::vector<float> CreateCircle(float centerX, float centerY, float radius, int res)
+{
+
+    std::vector<float> vertices;
+
+    // Center vertex
+    vertices.push_back(centerX);
+    vertices.push_back(centerY);
+    vertices.push_back(0.0f);
+
+    for (int i = 0; i <= res; i++)
+    {
+        float angle = 2.0f * M_PI * i / res;
+
+        vertices.push_back(centerX + radius * cos(angle));
+        vertices.push_back(centerY + radius * sin(angle));
+        vertices.push_back(0.0f);
+    }
+
+    return vertices;
 }
