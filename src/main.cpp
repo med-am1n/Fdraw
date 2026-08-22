@@ -33,7 +33,7 @@ int main()
 
     glfwInit();
 
-    GLFWwindow *window = startGLFW(SCR_WIDTH, SCR_HEIGHT, "OpenGL", framebuffer_size_callback, mouse_callback, scroll_callback);
+    GLFWwindow *window = startGLFW(SCR_WIDTH, SCR_HEIGHT, "Fdraw", framebuffer_size_callback, mouse_callback, scroll_callback);
 
     if (!window)
         return -1;
