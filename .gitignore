@@ -1,0 +1,41 @@
+# Build directories
+build/
+cmake-build-debug/
+cmake-build-release/
+dist/
+
+# Compiled objects and libraries
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+*.user
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.dSYM/
+
+# Output executables
+app
+*.out
