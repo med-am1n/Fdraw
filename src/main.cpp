@@ -30,6 +30,8 @@ int windowHeight = SCR_HEIGHT;
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 bool leftMouseDown = false;
+double prevX, prevY;
+bool hasPreviousPosition = false;
 
 struct Mesh
 {
@@ -119,13 +121,34 @@ int main()
 
         Gui::DrawMenu();
 
-        if (leftMouseDown)
+    if (leftMouseDown)
+    {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        if (hasPreviousPosition)
         {
-            double xpos, ypos;
-            glfwGetCursorPos(window, &xpos, &ypos);
-            Object circle(&circleMesh, glm::vec2((float)xpos, (float)ypos), 1.0f, "circle");
-            objects.push_back(circle);
+            double dx = xpos - prevX;
+            double dy = ypos - prevY;
+            double distance = std::sqrt(dx * dx + dy * dy);
+            int numSamples = std::max(static_cast<int>(distance / 1.0f),1);
+            for (int i = 0; i <= numSamples; ++i)
+            {
+                float t = static_cast<float>(i) / numSamples;
+                float vx = prevX + (xpos - prevX) * t;
+                float vy = prevY + (ypos - prevY) * t;
+                Object circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
+                objects.push_back(circle);
+            }
         }
+
+        prevX = xpos;
+        prevY = ypos;
+        hasPreviousPosition = true;
+    }
+    else
+    {
+        hasPreviousPosition = false;
+    }
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
