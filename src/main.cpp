@@ -44,7 +44,7 @@ struct Mesh
 };
 Mesh CreateCircle(float radius, int res);
 
-class Object
+class Point
 {
 public:
     Mesh *mesh;
@@ -54,7 +54,7 @@ public:
     std::string type;
     bool selected = false;
 
-    Object(Mesh *mesh, glm::vec2 position, float radius, std::string type)
+    Point(Mesh *mesh, glm::vec2 position, float radius, std::string type)
     {
         this->mesh = mesh;
         this->position = position;
@@ -82,7 +82,7 @@ public:
 };
 
 Mesh circleMesh;
-std::vector<Object> objects;
+std::vector<Point> points;
 
 int main()
 {
@@ -175,8 +175,8 @@ int main()
                         float t = static_cast<float>(i) / numSamples;
                         float vx = prevX + (xpos - prevX) * t;
                         float vy = prevY + (ypos - prevY) * t;
-                        Object circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
-                        objects.push_back(circle);
+                        Point circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
+                        points.push_back(circle);
                     }
                 }
 
@@ -229,32 +229,32 @@ int main()
 
                 glBindVertexArray(0);
 
-                for (auto i{objects.size()}; i-- > 0;)
+                for (auto i{points.size()}; i-- > 0;)
                 {
-                    glm::vec2 pos = objects[i].position;
+                    glm::vec2 pos = points[i].position;
 
                     if (pos.x >= minPos.x &&
                         pos.x <= maxPos.x &&
                         pos.y >= minPos.y &&
                         pos.y <= maxPos.y)
                     {
-                        objects[i].selected = true;
+                        points[i].selected = true;
                     }
                     else
                     {
-                        objects[i].selected = false;
+                        points[i].selected = false;
                     }
                 }
             }
         }
-        for (auto i{objects.size()}; i-- > 0;)
+        for (auto i{points.size()}; i-- > 0;)
         {
             shader.use();
             shader.setVec4("color",
-                           objects[i].selected
+                           points[i].selected
                                ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
                                : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-            objects[i].Draw(shader);
+            points[i].Draw(shader);
         }
 
         // imgui
