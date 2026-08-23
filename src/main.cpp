@@ -32,6 +32,7 @@ float lastFrame = 0.0f;
 bool leftMouseDown = false;
 double prevX, prevY;
 bool hasPreviousPosition = false;
+bool draw = true;
 
 struct Mesh
 {
@@ -98,11 +99,45 @@ int main()
         return -1;
     }
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     // // initialize Imgui
     Gui::Init(window);
 
+    // select rectangle
+    unsigned int selectVBO, selectEBO, selectVAO;
+
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f};
+
+    unsigned int indices[] = {
+        0, 1, 2,
+        2, 3, 0};
+    unsigned int indexCount = 6;
+
+    glGenVertexArrays(1, &selectVAO);
+    glGenBuffers(1, &selectVBO);
+    glGenBuffers(1, &selectEBO);
+
+    glBindVertexArray(selectVAO);
+
+    glBindBuffer(GL_ARRAY_BUFFER, selectVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, selectEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+
     // build and compile the shader program
     Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
+    Shader selectShader("../src/shaders/selectShader.vs", "../src/shaders/selectShader.fs");
     circleMesh = CreateCircle(1.0f, 100);
 
     glEnable(GL_DEPTH_TEST);
@@ -119,36 +154,38 @@ int main()
         // imgui
         Gui::BeginFrame();
 
-        Gui::DrawMenu();
-
-    if (leftMouseDown)
-    {
-        double xpos, ypos;
-        glfwGetCursorPos(window, &xpos, &ypos);
-        if (hasPreviousPosition)
+        Gui::DrawMenu(draw);
+        if (draw)
         {
-            double dx = xpos - prevX;
-            double dy = ypos - prevY;
-            double distance = std::sqrt(dx * dx + dy * dy);
-            int numSamples = std::max(static_cast<int>(distance / 1.0f),1);
-            for (int i = 0; i <= numSamples; ++i)
+            if (leftMouseDown)
             {
-                float t = static_cast<float>(i) / numSamples;
-                float vx = prevX + (xpos - prevX) * t;
-                float vy = prevY + (ypos - prevY) * t;
-                Object circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
-                objects.push_back(circle);
+                double xpos, ypos;
+                glfwGetCursorPos(window, &xpos, &ypos);
+                if (hasPreviousPosition)
+                {
+                    double dx = xpos - prevX;
+                    double dy = ypos - prevY;
+                    double distance = std::sqrt(dx * dx + dy * dy);
+                    int numSamples = std::max(static_cast<int>(distance / 1.0f), 1);
+                    for (int i = 0; i <= numSamples; ++i)
+                    {
+                        float t = static_cast<float>(i) / numSamples;
+                        float vx = prevX + (xpos - prevX) * t;
+                        float vy = prevY + (ypos - prevY) * t;
+                        Object circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
+                        objects.push_back(circle);
+                    }
+                }
+
+                prevX = xpos;
+                prevY = ypos;
+                hasPreviousPosition = true;
+            }
+            else
+            {
+                hasPreviousPosition = false;
             }
         }
-
-        prevX = xpos;
-        prevY = ypos;
-        hasPreviousPosition = true;
-    }
-    else
-    {
-        hasPreviousPosition = false;
-    }
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -157,6 +194,31 @@ int main()
         shader.use();
         shader.setMat4("projection", projection);
 
+        if (!draw)
+        {
+            if (leftMouseDown)
+            {
+                glDisable(GL_DEPTH_TEST);
+                double xpos, ypos;
+                glfwGetCursorPos(window, &xpos, &ypos);
+                glm::mat4 model = glm::mat4(1.0f);
+                model = glm::translate(model, glm::vec3(xpos, ypos, 0.0f));
+                model = glm::scale(model, glm::vec3(100.0f));
+
+                selectShader.use();
+                selectShader.setMat4("model", model);
+                selectShader.setMat4("projection", projection);
+
+                glBindVertexArray(selectVAO);
+                glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+
+                // border
+                glLineWidth(2.0f);
+                glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+                glBindVertexArray(0);
+            }
+        }
         for (auto i{objects.size()}; i-- > 0;)
         {
             objects[i].Draw(shader);

@@ -30,16 +30,15 @@ namespace Gui
     }
 
     // custom menu
-    inline void DrawMenu() 
+    inline void DrawMenu(bool& draw) 
     {
         ImGui::Begin("Menu");
 
-        if (ImGui::Button("Button")) {
-            // do somthing...
+        if (ImGui::Button("Change mode")) {
+            draw = !draw;
         }
-
+        ImGui::Text("Mode : %s", draw ? "draw" : "select");
         ImGui::Separator();
-
         ImGuiIO& io = ImGui::GetIO();
         ImGui::Text("Application average %.1f FPS", io.Framerate);
         ImGui::Text("Frame time: %.3f ms/frame", 1000.0f / io.Framerate);
