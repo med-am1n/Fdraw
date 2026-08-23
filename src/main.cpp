@@ -204,10 +204,13 @@ int main()
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
                 selectionEnd = glm::vec2(xpos, ypos);
-                
+
                 glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
                 glm::vec2 size = glm::abs(selectionEnd - selectionStart);
-                
+
+                glm::vec2 minPos = glm::min(selectionStart, selectionEnd);
+                glm::vec2 maxPos = glm::max(selectionStart, selectionEnd);
+
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(center, 0.0f));
                 model = glm::scale(model, glm::vec3(size, 1.0f));
@@ -224,6 +227,19 @@ int main()
                 glDrawArrays(GL_LINE_LOOP, 0, 4);
 
                 glBindVertexArray(0);
+
+                for (auto i{objects.size()}; i-- > 0;)
+                {
+                    glm::vec2 pos = objects[i].position;
+
+                    if (pos.x >= minPos.x &&
+                        pos.x <= maxPos.x &&
+                        pos.y >= minPos.y &&
+                        pos.y <= maxPos.y)
+                    {
+                        std::cout << "Object selected: "<< i << std::endl;
+                    }
+                }
             }
         }
         for (auto i{objects.size()}; i-- > 0;)
