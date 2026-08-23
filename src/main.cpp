@@ -28,6 +28,7 @@ void drawCircle(Shader &shader, unsigned int& VAO, glm::vec2 position, size_t si
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+float aspectRatio = static_cast<float>(SCR_WIDTH) / SCR_HEIGHT;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -262,6 +263,7 @@ static void setupMesh(unsigned int& VBO, unsigned int& VAO, std::vector<float> v
         model = glm::translate(model, glm::vec3(position.x, position.y, 0));
         // model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
         shader.setMat4("model", model);
+        shader.setFloat("aspectRatio", aspectRatio);
         glDrawArrays(GL_TRIANGLE_FAN, 0, size / 3);
         glBindVertexArray(0);
     }

@@ -6,5 +6,9 @@ uniform float aspectRatio;
 
 void main()
 {
-    gl_Position = model * vec4(aPos, 1.0);
+	vec4 pos = model * vec4(aPos, 1.0);
+
+    pos.x /= aspectRatio;
+
+    gl_Position = pos;
 }
