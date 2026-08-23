@@ -33,6 +33,8 @@ bool leftMouseDown = false;
 double prevX, prevY;
 bool hasPreviousPosition = false;
 bool draw = true;
+glm::vec2 selectionStart(0.0f);
+glm::vec2 selectionEnd(0.0f);
 
 struct Mesh
 {
@@ -201,9 +203,14 @@ int main()
                 glDisable(GL_DEPTH_TEST);
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
+                selectionEnd = glm::vec2(xpos, ypos);
+                
+                glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
+                glm::vec2 size = glm::abs(selectionEnd - selectionStart);
+                
                 glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(xpos, ypos, 0.0f));
-                model = glm::scale(model, glm::vec3(100.0f));
+                model = glm::translate(model, glm::vec3(center, 0.0f));
+                model = glm::scale(model, glm::vec3(size, 1.0f));
 
                 selectShader.use();
                 selectShader.setMat4("model", model);
@@ -340,6 +347,11 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         if (action == GLFW_PRESS)
         {
             leftMouseDown = true;
+            double xpos, ypos;
+
+            glfwGetCursorPos(window, &xpos, &ypos);
+            selectionStart = glm::vec2(xpos, ypos);
+            selectionEnd = selectionStart;
         }
         else if (action == GLFW_RELEASE)
         {
