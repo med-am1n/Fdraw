@@ -2,13 +2,9 @@
 layout (location = 0) in vec3 aPos;
 
 uniform mat4 model;
-uniform float aspectRatio;
+uniform mat4 projection;
 
 void main()
 {
-	vec4 pos = model * vec4(aPos, 1.0);
-
-    pos.x /= aspectRatio;
-
-    gl_Position = pos;
+    gl_Position = projection * model * vec4(aPos, 1.0);
 }

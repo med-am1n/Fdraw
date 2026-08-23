@@ -24,7 +24,8 @@ unsigned int LoadTexture(const char *path);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
-float aspectRatio = static_cast<float>(SCR_WIDTH) / SCR_HEIGHT;
+int windowWidth = SCR_WIDTH;
+int windowHeight = SCR_HEIGHT;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -35,18 +36,18 @@ struct Mesh
     unsigned int VBO;
     std::vector<float> vertices;
 };
-Mesh CreateCircle(float centerX, float centerY, float radius, int res);
+Mesh CreateCircle(float radius, int res);
 
 class Object
 {
 public:
-    Mesh* mesh;
+    Mesh *mesh;
 
     glm::vec2 position;
     float radius;
     std::string type;
 
-    Object(Mesh* mesh, glm::vec2 position, float radius, std::string type)
+    Object(Mesh *mesh, glm::vec2 position, float radius, std::string type)
     {
         this->mesh = mesh;
         this->position = position;
@@ -54,26 +55,27 @@ public:
         this->type = type;
     }
 
-    void Draw(Shader& shader)
+    void Draw(Shader &shader)
     {
         shader.use();
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
-        model = glm::scale(model, glm::vec3(radius/0.1f));
-
+        model = glm::scale(model, glm::vec3(radius / 0.1f));
         shader.setMat4("model", model);
-        shader.setFloat("aspectRatio", aspectRatio);
-        glBindVertexArray(mesh->VAO);
         
+        glBindVertexArray(mesh->VAO);
+
         if (type == "circle")
         {
-            glDrawArrays(GL_TRIANGLE_FAN,0, mesh->vertices.size() / 3);
+            glDrawArrays(GL_TRIANGLE_FAN, 0, mesh->vertices.size() / 3);
         }
-        
+
         glBindVertexArray(0);
     }
 };
 
+Mesh circleMesh;
+std::vector<Object> objects;
 
 int main()
 {
@@ -83,7 +85,6 @@ int main()
     glfwInit();
 
     GLFWwindow *window = startGLFW(SCR_WIDTH, SCR_HEIGHT, "Fdraw", framebuffer_size_callback, mouse_button_callback, cursor_position_callback, key_callback);
-
     if (!window)
         return -1;
 
@@ -99,10 +100,8 @@ int main()
 
     // build and compile the shader program
     Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
-    Mesh circleMesh = CreateCircle(0.0f, 0.0f, 0.1f, 100);
-    Object Circle1(&circleMesh, glm::vec2(0.0f), 0.1f, "circle");
+    circleMesh = CreateCircle(1.0f, 100);
 
-    
     glEnable(GL_DEPTH_TEST);
 
     // render loop
@@ -121,9 +120,15 @@ int main()
 
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         // rendering commands here
-        Circle1.Draw(shader);
+        glm::mat4 projection = glm::ortho( 0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
+        shader.use();
+        shader.setMat4("projection", projection);
+        
+        for (auto i{objects.size()}; i-- > 0;)
+        {
+            objects[i].Draw(shader);
+        }
 
         // imgui
         Gui::EndFrame();
@@ -222,9 +227,10 @@ void processInput(GLFWwindow *window)
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    // make sure the viewport matches the new window dimensions; note that width and
-    // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
+
+    windowWidth = width;
+    windowHeight = height;
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -239,10 +245,12 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
-            std::cout << "left mouse is pressed" << std::endl;
-            // new circle object with position and radius,
-            // postion can be obtined from cursor_position_callback
-            // push circle obj to a vector that  all its objects are renderd
+            double xpos, ypos;
+
+            glfwGetCursorPos(window, &xpos, &ypos);
+            std::cout << "left mouse is pressed at " << xpos << ", " << ypos << std::endl;
+            Object circle(&circleMesh, glm::vec2((float) xpos, (float)ypos), 1.0f, "circle");
+            objects.push_back(circle);
         }
         else if (action == GLFW_RELEASE)
         {
@@ -252,7 +260,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 }
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
-    std::cout << "cursor position:( " << xpos << ", " << ypos << " )" << std::endl;
+    // std::cout << "cursor position:( " << xpos << ", " << ypos << " )" << std::endl;
 }
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
@@ -261,23 +269,22 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
-Mesh CreateCircle(float centerX, float centerY, float radius, int res)
+Mesh CreateCircle(float radius, int res)
 {
 
     Mesh mesh;
 
     // Generate vertices
-    mesh.vertices.push_back(centerX);
-    mesh.vertices.push_back(centerY);
     mesh.vertices.push_back(0.0f);
-
+    mesh.vertices.push_back(0.0f);
+    mesh.vertices.push_back(0.0f);
 
     for (int i = 0; i <= res; i++)
     {
         float angle = 2.0f * M_PI * i / res;
 
-        mesh.vertices.push_back(centerX + radius * cos(angle));
-        mesh.vertices.push_back(centerY + radius * sin(angle));
+        mesh.vertices.push_back(radius * cos(angle));
+        mesh.vertices.push_back(radius * sin(angle));
         mesh.vertices.push_back(0.0f);
     }
 
@@ -285,7 +292,6 @@ Mesh CreateCircle(float centerX, float centerY, float radius, int res)
     glGenBuffers(1, &mesh.VBO);
 
     glBindVertexArray(mesh.VAO);
-
 
     glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
     glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW);
