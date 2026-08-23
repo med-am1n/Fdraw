@@ -5,7 +5,6 @@
 #include "camera.h"
 #include <stb_image.h>
 #include <filesystem.h>
-#include <mesh.h>
 #include <gui.h>
 
 // glm
@@ -22,9 +21,6 @@ void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb, GLFWmousebuttonfun button_cb, GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
 unsigned int LoadTexture(const char *path);
-std::vector<float> CreateCircle(float centerX, float centerY, float radius, int res);
-static void setupMesh(unsigned int &VAO, unsigned int &VBO, std::vector<float> vertices);
-void drawCircle(Shader &shader, unsigned int& VAO, glm::vec2 position, size_t size);
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -32,6 +28,52 @@ float aspectRatio = static_cast<float>(SCR_WIDTH) / SCR_HEIGHT;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+
+struct Mesh
+{
+    unsigned int VAO;
+    unsigned int VBO;
+    std::vector<float> vertices;
+};
+Mesh CreateCircle(float centerX, float centerY, float radius, int res);
+
+class Object
+{
+public:
+    Mesh* mesh;
+
+    glm::vec2 position;
+    float radius;
+    std::string type;
+
+    Object(Mesh* mesh, glm::vec2 position, float radius, std::string type)
+    {
+        this->mesh = mesh;
+        this->position = position;
+        this->radius = radius;
+        this->type = type;
+    }
+
+    void Draw(Shader& shader)
+    {
+        shader.use();
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
+        model = glm::scale(model, glm::vec3(radius/0.1f));
+
+        shader.setMat4("model", model);
+        shader.setFloat("aspectRatio", aspectRatio);
+        glBindVertexArray(mesh->VAO);
+        
+        if (type == "circle")
+        {
+            glDrawArrays(GL_TRIANGLE_FAN,0, mesh->vertices.size() / 3);
+        }
+        
+        glBindVertexArray(0);
+    }
+};
+
 
 int main()
 {
@@ -57,11 +99,10 @@ int main()
 
     // build and compile the shader program
     Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
+    Mesh circleMesh = CreateCircle(0.0f, 0.0f, 0.1f, 100);
+    Object Circle1(&circleMesh, glm::vec2(0.0f), 0.1f, "circle");
 
-
-    unsigned int VBO, VAO;
-    std::vector<float> vertices = CreateCircle(0.0f, 0.0f, 0.5f, 100);
-    setupMesh(VBO, VAO, vertices);
+    
     glEnable(GL_DEPTH_TEST);
 
     // render loop
@@ -82,7 +123,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // rendering commands here
-        drawCircle(shader, VAO, glm::vec2(0.0f, 0.0f), vertices.size());
+        Circle1.Draw(shader);
 
         // imgui
         Gui::EndFrame();
@@ -199,6 +240,9 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         if (action == GLFW_PRESS)
         {
             std::cout << "left mouse is pressed" << std::endl;
+            // new circle object with position and radius,
+            // postion can be obtined from cursor_position_callback
+            // push circle obj to a vector that  all its objects are renderd
         }
         else if (action == GLFW_RELEASE)
         {
@@ -217,53 +261,39 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
     }
 }
 
-std::vector<float> CreateCircle(float centerX, float centerY, float radius, int res)
+Mesh CreateCircle(float centerX, float centerY, float radius, int res)
 {
 
-    std::vector<float> vertices;
+    Mesh mesh;
 
-    // Center vertex
-    vertices.push_back(centerX);
-    vertices.push_back(centerY);
-    vertices.push_back(0.0f);
+    // Generate vertices
+    mesh.vertices.push_back(centerX);
+    mesh.vertices.push_back(centerY);
+    mesh.vertices.push_back(0.0f);
+
 
     for (int i = 0; i <= res; i++)
     {
         float angle = 2.0f * M_PI * i / res;
 
-        vertices.push_back(centerX + radius * cos(angle));
-        vertices.push_back(centerY + radius * sin(angle));
-        vertices.push_back(0.0f);
+        mesh.vertices.push_back(centerX + radius * cos(angle));
+        mesh.vertices.push_back(centerY + radius * sin(angle));
+        mesh.vertices.push_back(0.0f);
     }
 
-    return vertices;
-}
+    glGenVertexArrays(1, &mesh.VAO);
+    glGenBuffers(1, &mesh.VBO);
 
-static void setupMesh(unsigned int& VBO, unsigned int& VAO, std::vector<float> vertices)
-{
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
+    glBindVertexArray(mesh.VAO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    glBindBuffer(GL_ARRAY_BUFFER, mesh.VBO);
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW);
 
     int stride = 3 * sizeof(float);
     // position attribute
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void *)0);
     glEnableVertexAttribArray(0);
+
+    return mesh;
 }
-
-
-    void drawCircle(Shader &shader, unsigned int& VAO, glm::vec2 position, size_t size)
-    {   
-        shader.use();
-        glBindVertexArray(VAO);
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(position.x, position.y, 0));
-        // model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 1.0f, 0.0f));
-        shader.setMat4("model", model);
-        shader.setFloat("aspectRatio", aspectRatio);
-        glDrawArrays(GL_TRIANGLE_FAN, 0, size / 3);
-        glBindVertexArray(0);
-    }
