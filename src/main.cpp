@@ -52,6 +52,7 @@ public:
     glm::vec2 position;
     float radius;
     std::string type;
+    bool selected = false;
 
     Object(Mesh *mesh, glm::vec2 position, float radius, std::string type)
     {
@@ -237,13 +238,22 @@ int main()
                         pos.y >= minPos.y &&
                         pos.y <= maxPos.y)
                     {
-                        std::cout << "Object selected: "<< i << std::endl;
+                        objects[i].selected = true;
+                    }
+                    else
+                    {
+                        objects[i].selected = false;
                     }
                 }
             }
         }
         for (auto i{objects.size()}; i-- > 0;)
         {
+            shader.use();
+            shader.setVec4("color",
+                           objects[i].selected
+                               ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
+                               : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
             objects[i].Draw(shader);
         }
 
