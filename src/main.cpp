@@ -53,6 +53,7 @@ public:
     float radius;
     std::string type;
     bool selected = false;
+    int strokId = -1;
 
     Point(Mesh *mesh, glm::vec2 position, float radius, std::string type)
     {
@@ -83,6 +84,14 @@ public:
 
 Mesh circleMesh;
 std::vector<Point> points;
+
+struct Stroke
+{
+    std::vector<Point> points;
+    bool selected = false;
+};
+
+std::vector<Stroke> strokes;
 
 int main()
 {
@@ -144,7 +153,7 @@ int main()
     circleMesh = CreateCircle(1.0f, 100);
 
     glEnable(GL_DEPTH_TEST);
-
+    int currentStrokeId = 0;
     // render loop
     while (!glfwWindowShouldClose(window))
     {
@@ -176,6 +185,7 @@ int main()
                         float vx = prevX + (xpos - prevX) * t;
                         float vy = prevY + (ypos - prevY) * t;
                         Point circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
+                        circle.strokId = currentStrokeId;
                         points.push_back(circle);
                     }
                 }
@@ -186,6 +196,11 @@ int main()
             }
             else
             {
+                if (hasPreviousPosition)
+                {
+                    currentStrokeId++;
+                    std::cout<<"currentStrokeId: "<<currentStrokeId<<std::endl;
+                }
                 hasPreviousPosition = false;
             }
         }
