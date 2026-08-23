@@ -29,6 +29,7 @@ int windowHeight = SCR_HEIGHT;
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
+bool leftMouseDown = false;
 
 struct Mesh
 {
@@ -62,7 +63,7 @@ public:
         model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
         model = glm::scale(model, glm::vec3(radius / 0.1f));
         shader.setMat4("model", model);
-        
+
         glBindVertexArray(mesh->VAO);
 
         if (type == "circle")
@@ -118,13 +119,21 @@ int main()
 
         Gui::DrawMenu();
 
+        if (leftMouseDown)
+        {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            Object circle(&circleMesh, glm::vec2((float)xpos, (float)ypos), 1.0f, "circle");
+            objects.push_back(circle);
+        }
+
         glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // rendering commands here
-        glm::mat4 projection = glm::ortho( 0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
+        glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
         shader.use();
         shader.setMat4("projection", projection);
-        
+
         for (auto i{objects.size()}; i-- > 0;)
         {
             objects[i].Draw(shader);
@@ -245,16 +254,11 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
     {
         if (action == GLFW_PRESS)
         {
-            double xpos, ypos;
-
-            glfwGetCursorPos(window, &xpos, &ypos);
-            std::cout << "left mouse is pressed at " << xpos << ", " << ypos << std::endl;
-            Object circle(&circleMesh, glm::vec2((float) xpos, (float)ypos), 1.0f, "circle");
-            objects.push_back(circle);
+            leftMouseDown = true;
         }
         else if (action == GLFW_RELEASE)
         {
-            std::cout << "left mouse is released" << std::endl;
+            leftMouseDown = false;
         }
     }
 }
