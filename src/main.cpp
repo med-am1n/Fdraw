@@ -179,6 +179,7 @@ int main()
                     double dy = ypos - prevY;
                     double distance = std::sqrt(dx * dx + dy * dy);
                     int numSamples = std::max(static_cast<int>(distance / 1.0f), 1);
+                    Stroke stroke;
                     for (int i = 0; i <= numSamples; ++i)
                     {
                         float t = static_cast<float>(i) / numSamples;
@@ -186,7 +187,7 @@ int main()
                         float vy = prevY + (ypos - prevY) * t;
                         Point circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
                         circle.strokId = currentStrokeId;
-                        points.push_back(circle);
+                        strokes[strokes.size() - 1].points.push_back(circle);
                     }
                 }
 
@@ -196,11 +197,6 @@ int main()
             }
             else
             {
-                if (hasPreviousPosition)
-                {
-                    currentStrokeId++;
-                    std::cout<<"currentStrokeId: "<<currentStrokeId<<std::endl;
-                }
                 hasPreviousPosition = false;
             }
         }
@@ -262,14 +258,15 @@ int main()
                 }
             }
         }
-        for (auto i{points.size()}; i-- > 0;)
+        for (Stroke &s : strokes)
         {
-            shader.use();
-            shader.setVec4("color",
-                           points[i].selected
-                               ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
-                               : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
-            points[i].Draw(shader);
+            for (Point &p : s.points)
+            {
+                shader.use();
+                shader.setVec4("color", p.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
+                                                   : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                p.Draw(shader);
+            }
         }
 
         // imgui
@@ -389,10 +386,12 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         {
             leftMouseDown = true;
             double xpos, ypos;
-
+            std::cout << "left mouse presed\n";
             glfwGetCursorPos(window, &xpos, &ypos);
             selectionStart = glm::vec2(xpos, ypos);
             selectionEnd = selectionStart;
+            Stroke currentStroke;
+            strokes.push_back(currentStroke);
         }
         else if (action == GLFW_RELEASE)
         {
