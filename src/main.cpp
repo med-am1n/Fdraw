@@ -211,6 +211,11 @@ int main()
         {
             if (leftMouseDown)
             {
+
+                for (Stroke &s : strokes)
+                {
+                    s.selected = false;
+                }
                 glDisable(GL_DEPTH_TEST);
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
@@ -252,10 +257,6 @@ int main()
                         {
                             s.selected = true;
                         }
-                        else
-                        {
-                            s.selected = false;
-                        }
                     }
                 }
             }
@@ -266,7 +267,7 @@ int main()
             {
                 shader.use();
                 shader.setVec4("color", s.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
-                                                   : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                                                              : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
                 p.Draw(shader);
             }
         }
