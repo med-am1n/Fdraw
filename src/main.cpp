@@ -83,7 +83,6 @@ public:
 };
 
 Mesh circleMesh;
-std::vector<Point> points;
 
 struct Stroke
 {
@@ -240,20 +239,23 @@ int main()
 
                 glBindVertexArray(0);
 
-                for (auto i{points.size()}; i-- > 0;)
+                for (Stroke &s : strokes)
                 {
-                    glm::vec2 pos = points[i].position;
+                    for (Point &p : s.points)
+                    {
+                        glm::vec2 pos = p.position;
 
-                    if (pos.x >= minPos.x &&
-                        pos.x <= maxPos.x &&
-                        pos.y >= minPos.y &&
-                        pos.y <= maxPos.y)
-                    {
-                        points[i].selected = true;
-                    }
-                    else
-                    {
-                        points[i].selected = false;
+                        if (pos.x >= minPos.x &&
+                            pos.x <= maxPos.x &&
+                            pos.y >= minPos.y &&
+                            pos.y <= maxPos.y)
+                        {
+                            s.selected = true;
+                        }
+                        else
+                        {
+                            s.selected = false;
+                        }
                     }
                 }
             }
@@ -263,7 +265,7 @@ int main()
             for (Point &p : s.points)
             {
                 shader.use();
-                shader.setVec4("color", p.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
+                shader.setVec4("color", s.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
                                                    : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
                 p.Draw(shader);
             }
