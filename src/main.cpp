@@ -246,16 +246,19 @@ int main()
 
                 for (Stroke &s : strokes)
                 {
+                    s.selected = true;
+
                     for (Point &p : s.points)
                     {
                         glm::vec2 pos = p.position;
 
-                        if (pos.x >= minPos.x &&
-                            pos.x <= maxPos.x &&
-                            pos.y >= minPos.y &&
-                            pos.y <= maxPos.y)
+                        if (pos.x < minPos.x ||
+                            pos.x > maxPos.x ||
+                            pos.y < minPos.y ||
+                            pos.y > maxPos.y)
                         {
-                            s.selected = true;
+                            s.selected = false;
+                            break;
                         }
                     }
                 }
@@ -267,7 +270,7 @@ int main()
             {
                 shader.use();
                 shader.setVec4("color", s.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
-                                                              : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                                                   : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
                 p.Draw(shader);
             }
         }
