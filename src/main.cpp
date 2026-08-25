@@ -36,6 +36,12 @@ bool draw = true;
 glm::vec2 selectionStart(0.0f);
 glm::vec2 selectionEnd(0.0f);
 
+bool draging = false;
+bool selection = false;
+
+glm::vec2 minPos;
+glm::vec2 maxPos;
+
 struct Mesh
 {
     unsigned int VAO;
@@ -206,12 +212,45 @@ int main()
         glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
         shader.use();
         shader.setMat4("projection", projection);
-
         if (!draw)
         {
-            if (leftMouseDown)
-            {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            glm::vec2 mousePos = glm::vec2((float)xpos, (float)ypos);
 
+            if (mousePos.x >= minPos.x &&
+                mousePos.x <= maxPos.x &&
+                mousePos.y >= minPos.y &&
+                mousePos.y <= maxPos.y)
+            {
+                std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
+                if (leftMouseDown && !selection)
+                {
+                    std::cout << "click in slected Area\n";
+                    draging = true;
+                    float dragingValue=5; // to be claculated later
+                    for (Stroke &s : strokes)
+                    {
+                        if (s.selected == true)
+                        {
+                            for (Point &p : s.points)
+                            {
+                                p.position.x +=dragingValue;
+                                p.position.y +=dragingValue;
+                            }
+                        }
+                    }
+                    minPos.x += dragingValue;
+                    maxPos.x += dragingValue;
+                    minPos.y += dragingValue;
+                    maxPos.y += dragingValue;
+
+                }
+            }
+
+            if (leftMouseDown && !draging)
+            {
+                selection = true;
                 for (Stroke &s : strokes)
                 {
                     s.selected = false;
@@ -224,8 +263,8 @@ int main()
                 glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
                 glm::vec2 size = glm::abs(selectionEnd - selectionStart);
 
-                glm::vec2 minPos = glm::min(selectionStart, selectionEnd);
-                glm::vec2 maxPos = glm::max(selectionStart, selectionEnd);
+                minPos = glm::min(selectionStart, selectionEnd);
+                maxPos = glm::max(selectionStart, selectionEnd);
 
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(center, 0.0f));
@@ -402,6 +441,8 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         else if (action == GLFW_RELEASE)
         {
             leftMouseDown = false;
+            if(selection) selection=false;
+            if(draging) draging = false;
         }
     }
 }
