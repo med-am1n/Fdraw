@@ -47,7 +47,6 @@ glm::vec2 maxSelectedArea(-FLT_MAX);
 float brushRadius = 5.0f;
 glm::vec4 brushColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-
 struct Mesh
 {
     unsigned int VAO;
@@ -385,8 +384,8 @@ int main()
             for (Point &p : s.points)
             {
                 shader.use();
-                shader.setVec4("color", s.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
-                                                   : p.color);
+                glm::vec4 selectedColor = glm::mix(p.color,glm::vec4(0.8f, 0.8f, 0.8f, p.color.a), 0.35f);
+                shader.setVec4("color", s.selected ? selectedColor : p.color);
                 p.Draw(shader);
             }
         }
