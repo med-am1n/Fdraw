@@ -189,6 +189,10 @@ int main()
         Gui::DrawMenu(draw);
         if (draw)
         {
+            for (Stroke &s : strokes)
+            {
+                s.selected = false;
+            }
             if (leftMouseDown)
             {
                 double xpos, ypos;
