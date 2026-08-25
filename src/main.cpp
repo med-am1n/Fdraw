@@ -76,7 +76,7 @@ public:
         shader.use();
         glm::mat4 model = glm::mat4(1.0f);
         model = glm::translate(model, glm::vec3(position.x, position.y, 0.0f));
-        model = glm::scale(model, glm::vec3(radius / 0.1f));
+        model = glm::scale(model, glm::vec3(radius, radius, 1.0f));
         shader.setMat4("model", model);
 
         glBindVertexArray(mesh->VAO);
@@ -209,7 +209,7 @@ int main()
                         float t = static_cast<float>(i) / numSamples;
                         float vx = prevX + (xpos - prevX) * t;
                         float vy = prevY + (ypos - prevY) * t;
-                        Point circle(&circleMesh, glm::vec2(vx, vy), 0.5f, "circle");
+                        Point circle(&circleMesh, glm::vec2(vx, vy), 1.0f, "circle");
                         circle.strokId = currentStrokeId;
                         strokes[strokes.size() - 1].points.push_back(circle);
                     }
@@ -334,11 +334,11 @@ int main()
                         hasSelectedArea = true;
                         for (const Point &p : s.points)
                         {
-                            minSelectedArea.x = std::min(minSelectedArea.x, p.position.x);
-                            minSelectedArea.y = std::min(minSelectedArea.y, p.position.y);
+                            minSelectedArea.x = std::min(minSelectedArea.x, p.position.x - p.radius);
+                            minSelectedArea.y = std::min(minSelectedArea.y, p.position.y - p.radius);
 
-                            maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x);
-                            maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y);
+                            maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x + p.radius);
+                            maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y + p.radius);
                         }
                     }
                 }
