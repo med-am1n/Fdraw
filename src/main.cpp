@@ -341,31 +341,34 @@ int main()
             }
         }
 
-        glm::vec2 selectedAreaVertices[] = {
-            {minSelectedArea.x, minSelectedArea.y},
-            {maxSelectedArea.x, minSelectedArea.y},
-            {maxSelectedArea.x, maxSelectedArea.y},
-            {minSelectedArea.x, maxSelectedArea.y}};
+        if (hasSelectedArea)
+        {
+            glm::vec2 selectedAreaVertices[] = {
+                {minSelectedArea.x, minSelectedArea.y},
+                {maxSelectedArea.x, minSelectedArea.y},
+                {maxSelectedArea.x, maxSelectedArea.y},
+                {minSelectedArea.x, maxSelectedArea.y}};
 
-        glBindVertexArray(selectedVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, selectedVBO);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(selectedAreaVertices), selectedAreaVertices);
-        glBindVertexArray(0);
+            glBindVertexArray(selectedVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, selectedVBO);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(selectedAreaVertices), selectedAreaVertices);
+            glBindVertexArray(0);
 
-        selectedShader.use();
+            selectedShader.use();
 
-        glm::mat4 model = glm::mat4(1.0f);
+            glm::mat4 model = glm::mat4(1.0f);
 
-        selectedShader.setMat4("model", model);
-        selectedShader.setMat4("projection", projection);
+            selectedShader.setMat4("model", model);
+            selectedShader.setMat4("projection", projection);
 
-        glBindVertexArray(selectedVAO);
+            glBindVertexArray(selectedVAO);
 
-        glLineWidth(2.0f);
+            glLineWidth(2.0f);
 
-        glDrawArrays(GL_LINE_LOOP, 0, 4);
+            glDrawArrays(GL_LINE_LOOP, 0, 4);
 
-        glBindVertexArray(0);
+            glBindVertexArray(0);
+        }
 
         for (Stroke &s : strokes)
         {
