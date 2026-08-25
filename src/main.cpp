@@ -273,10 +273,14 @@ int main()
             if (leftMouseDown && !dragging)
             {
                 selection = true;
+                minSelectedArea = glm::vec2(FLT_MAX);
+                maxSelectedArea = glm::vec2(-FLT_MAX);
+
                 for (Stroke &s : strokes)
                 {
                     s.selected = false;
                 }
+
                 glDisable(GL_DEPTH_TEST);
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
