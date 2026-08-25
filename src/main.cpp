@@ -106,7 +106,8 @@ struct Stroke
 
 std::vector<Stroke> strokes;
 
-void clear(){
+void clear()
+{
     strokes.clear();
 }
 
@@ -196,7 +197,7 @@ int main()
         // imgui
         Gui::BeginFrame();
 
-        Gui::DrawMenu(draw, brushRadius, brushColor,clear);
+        Gui::DrawMenu(draw, brushRadius, brushColor, clear);
         if (draw)
         {
             for (Stroke &s : strokes)
@@ -389,7 +390,7 @@ int main()
             for (Point &p : s.points)
             {
                 shader.use();
-                glm::vec4 selectedColor = glm::mix(p.color,glm::vec4(0.8f, 0.8f, 0.8f, p.color.a), 0.35f);
+                glm::vec4 selectedColor = glm::mix(p.color, glm::vec4(0.8f, 0.8f, 0.8f, p.color.a), 0.35f);
                 shader.setVec4("color", s.selected ? selectedColor : p.color);
                 p.Draw(shader);
             }
@@ -506,6 +507,13 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
+    // ignore GLFW mouse inputs when the cursor interacts with ImGui, 
+    ImGuiIO &io = ImGui::GetIO();
+    if (io.WantCaptureMouse)
+    {
+        return;
+    }
+
     if (button == GLFW_MOUSE_BUTTON_LEFT)
     {
         if (action == GLFW_PRESS)
