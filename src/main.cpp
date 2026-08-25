@@ -219,35 +219,40 @@ int main()
             glfwGetCursorPos(window, &xpos, &ypos);
             glm::vec2 mousePos = glm::vec2((float)xpos, (float)ypos);
 
-            if (mousePos.x >= minPos.x &&
-                mousePos.x <= maxPos.x &&
-                mousePos.y >= minPos.y &&
-                mousePos.y <= maxPos.y)
+            if (leftMouseDown && !selection)
             {
-                std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
-                if (leftMouseDown && !selection)
+                if (!dragging)
                 {
-                    if (!dragging)
+                    if (mousePos.x >= minPos.x &&
+                        mousePos.x <= maxPos.x &&
+                        mousePos.y >= minPos.y &&
+                        mousePos.y <= maxPos.y)
                     {
+                        std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
                         dragging = true;
                         previousMousePos = mousePos;
                     }
-
-                    std::cout << "click in slected Area\n";
-                    glm::vec2 delta = mousePos - previousMousePos;
-                    for (Stroke &s : strokes)
+                }
+                if (dragging)
+                {
+                    if (leftMouseDown && !selection)
                     {
-                        if (s.selected == true)
+                        std::cout << "click in slected Area\n";
+                        glm::vec2 delta = mousePos - previousMousePos;
+                        for (Stroke &s : strokes)
                         {
-                            for (Point &p : s.points)
+                            if (s.selected == true)
                             {
-                                p.position += delta;
+                                for (Point &p : s.points)
+                                {
+                                    p.position += delta;
+                                }
                             }
                         }
+                        minPos += delta;
+                        maxPos += delta;
+                        previousMousePos = mousePos;
                     }
-                    minPos += delta;
-                    maxPos += delta;
-                    previousMousePos = mousePos;
                 }
             }
 
