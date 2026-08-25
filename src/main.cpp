@@ -33,7 +33,15 @@ float lastFrame = 0.0f;
 bool leftMouseDown = false;
 double prevX, prevY;
 bool hasPreviousPosition = false;
-bool draw = true;
+
+enum class Mode
+{
+    Draw,
+    Select,
+    Erase
+};
+Mode currentmode = Mode::Draw;
+
 glm::vec2 selectionStart(0.0f);
 glm::vec2 selectionEnd(0.0f);
 glm::vec2 previousMousePos;
@@ -111,6 +119,54 @@ void clear()
     strokes.clear();
 }
 
+void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<void()> &clear)
+{
+    ImGui::Begin("Menu");
+
+    if (ImGui::Button("Clear"))
+    {
+        clear();
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Draw"))
+    {
+        mode=Mode::Draw;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Select"))
+    {
+        mode=Mode::Select;
+    }
+
+    ImGui::Text("Mode: %s", (mode==Mode::Draw) ? "Draw" : "Select");
+
+    ImGui::SameLine();
+
+    ImGui::SetNextItemWidth(100.0f);
+    ImGui::SliderFloat("Radius", &radius, 1.0f, 30.0f);
+
+    ImGui::SameLine();
+
+    ImGui::ColorEdit4(
+        "Color",
+        glm::value_ptr(color),
+        ImGuiColorEditFlags_NoInputs);
+
+    ImGui::SameLine();
+
+    ImGuiIO &io = ImGui::GetIO();
+    ImGui::Text("FPS: %.1f", io.Framerate);
+
+    ImGui::SameLine();
+
+    ImGui::Text("%.3f ms/frame", 1000.0f / io.Framerate);
+
+    ImGui::End();
+}
 int main()
 {
 
@@ -197,8 +253,8 @@ int main()
         // imgui
         Gui::BeginFrame();
 
-        Gui::DrawMenu(draw, brushRadius, brushColor, clear);
-        if (draw)
+        DrawMenu(currentmode, brushRadius, brushColor, clear);
+        if (currentmode == Mode::Draw)
         {
             for (Stroke &s : strokes)
             {
@@ -242,7 +298,7 @@ int main()
         glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
         shader.use();
         shader.setMat4("projection", projection);
-        if (!draw)
+        if (currentmode == Mode::Select)
         {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
@@ -507,7 +563,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 {
-    // ignore GLFW mouse inputs when the cursor interacts with ImGui, 
+    // ignore GLFW mouse inputs when the cursor interacts with ImGui,
     ImGuiIO &io = ImGui::GetIO();
     if (io.WantCaptureMouse)
     {

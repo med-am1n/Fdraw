@@ -30,51 +30,6 @@ namespace Gui
         ImGui::NewFrame();
     }
 
-    // custom menu
-    inline void DrawMenu(bool &draw, float &radius, glm::vec4 &color, const std::function<void()> &clear)
-    {
-        ImGui::Begin("Menu");
-
-        if (ImGui::Button("Clear"))
-        {
-            clear();
-        }
-        
-        ImGui::SameLine();
-        
-        if (ImGui::Button("Change mode"))
-        {
-            draw = !draw;
-        }
-
-        ImGui::SameLine();
-
-        ImGui::Text("Mode: %s", draw ? "Draw" : "Select");
-
-        ImGui::SameLine();
-
-        ImGui::SetNextItemWidth(100.0f);
-        ImGui::SliderFloat("Radius", &radius, 1.0f, 30.0f);
-
-        ImGui::SameLine();
-
-        ImGui::ColorEdit4(
-            "Color",
-            glm::value_ptr(color),
-            ImGuiColorEditFlags_NoInputs);
-
-        ImGui::SameLine();
-
-        ImGuiIO &io = ImGui::GetIO();
-        ImGui::Text("FPS: %.1f", io.Framerate);
-
-        ImGui::SameLine();
-
-        ImGui::Text("%.3f ms/frame", 1000.0f / io.Framerate);
-
-        ImGui::End();
-    }
-
     // call at the end of every frame
     inline void EndFrame()
     {
