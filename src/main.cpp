@@ -66,13 +66,15 @@ public:
     std::string type;
     bool selected = false;
     int strokId = -1;
+    glm::vec4 color;
 
-    Point(Mesh *mesh, glm::vec2 position, float radius, std::string type)
+    Point(Mesh *mesh, glm::vec2 position, float radius, std::string type, glm::vec4 color)
     {
         this->mesh = mesh;
         this->position = position;
         this->radius = radius;
         this->type = type;
+        this->color = color;
     }
 
     void Draw(Shader &shader)
@@ -213,7 +215,7 @@ int main()
                         float t = static_cast<float>(i) / numSamples;
                         float vx = prevX + (xpos - prevX) * t;
                         float vy = prevY + (ypos - prevY) * t;
-                        Point circle(&circleMesh, glm::vec2(vx, vy), brushRadius, "circle");
+                        Point circle(&circleMesh, glm::vec2(vx, vy), brushRadius, "circle", brushColor);
                         circle.strokId = currentStrokeId;
                         strokes[strokes.size() - 1].points.push_back(circle);
                     }
@@ -384,7 +386,7 @@ int main()
             {
                 shader.use();
                 shader.setVec4("color", s.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
-                                                   : brushColor);
+                                                   : p.color);
                 p.Draw(shader);
             }
         }
