@@ -37,7 +37,7 @@ glm::vec2 selectionStart(0.0f);
 glm::vec2 selectionEnd(0.0f);
 glm::vec2 previousMousePos;
 
-bool draging = false;
+bool dragging = false;
 bool selection = false;
 
 glm::vec2 minPos;
@@ -227,9 +227,9 @@ int main()
                 std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
                 if (leftMouseDown && !selection)
                 {
-                    if (!draging)
+                    if (!dragging)
                     {
-                        draging = true;
+                        dragging = true;
                         previousMousePos = mousePos;
                     }
 
@@ -251,7 +251,7 @@ int main()
                 }
             }
 
-            if (leftMouseDown && !draging)
+            if (leftMouseDown && !dragging)
             {
                 selection = true;
                 for (Stroke &s : strokes)
@@ -446,8 +446,8 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             leftMouseDown = false;
             if (selection)
                 selection = false;
-            if (draging)
-                draging = false;
+            if (dragging)
+                dragging = false;
         }
     }
 }
