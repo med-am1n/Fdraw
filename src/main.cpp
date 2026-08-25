@@ -40,8 +40,8 @@ glm::vec2 previousMousePos;
 bool dragging = false;
 bool selection = false;
 
-glm::vec2 minPos;
-glm::vec2 maxPos;
+glm::vec2 minSelectedArea(FLT_MAX);
+glm::vec2 maxSelectedArea(-FLT_MAX);
 
 struct Mesh
 {
@@ -223,10 +223,10 @@ int main()
             {
                 if (!dragging)
                 {
-                    if (mousePos.x >= minPos.x &&
-                        mousePos.x <= maxPos.x &&
-                        mousePos.y >= minPos.y &&
-                        mousePos.y <= maxPos.y)
+                    if (mousePos.x >= minSelectedArea.x &&
+                        mousePos.x <= maxSelectedArea.x &&
+                        mousePos.y >= minSelectedArea.y &&
+                        mousePos.y <= maxSelectedArea.y)
                     {
                         std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
                         dragging = true;
@@ -249,8 +249,8 @@ int main()
                                 }
                             }
                         }
-                        minPos += delta;
-                        maxPos += delta;
+                        minSelectedArea += delta;
+                        maxSelectedArea += delta;
                         previousMousePos = mousePos;
                     }
                 }
@@ -271,8 +271,8 @@ int main()
                 glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
                 glm::vec2 size = glm::abs(selectionEnd - selectionStart);
 
-                minPos = glm::min(selectionStart, selectionEnd);
-                maxPos = glm::max(selectionStart, selectionEnd);
+                glm::vec2 minPos = glm::min(selectionStart, selectionEnd);
+                glm::vec2 maxPos = glm::max(selectionStart, selectionEnd);
 
                 glm::mat4 model = glm::mat4(1.0f);
                 model = glm::translate(model, glm::vec3(center, 0.0f));
@@ -290,7 +290,6 @@ int main()
                 glDrawArrays(GL_LINE_LOOP, 0, 4);
 
                 glBindVertexArray(0);
-
                 for (Stroke &s : strokes)
                 {
                     s.selected = true;
@@ -306,6 +305,17 @@ int main()
                         {
                             s.selected = false;
                             break;
+                        }
+                    }
+                    if (s.selected)
+                    {
+                        for (const Point &p : s.points)
+                        {
+                            minSelectedArea.x = std::min(minSelectedArea.x, p.position.x);
+                            minSelectedArea.y = std::min(minSelectedArea.y, p.position.y);
+
+                            maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x);
+                            maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y);
                         }
                     }
                 }
