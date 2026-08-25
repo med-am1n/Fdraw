@@ -6,7 +6,6 @@
 #include "backends/imgui_impl_opengl3.h"
 #include <glm/gtc/type_ptr.hpp>
 
-
 // no need to include glfw3.h here
 struct GLFWwindow;
 
@@ -32,10 +31,17 @@ namespace Gui
     }
 
     // custom menu
-    inline void DrawMenu(bool &draw, float &radius, glm::vec4 &color)
+    inline void DrawMenu(bool &draw, float &radius, glm::vec4 &color, const std::function<void()> &clear)
     {
         ImGui::Begin("Menu");
 
+        if (ImGui::Button("Clear"))
+        {
+            clear();
+        }
+        
+        ImGui::SameLine();
+        
         if (ImGui::Button("Change mode"))
         {
             draw = !draw;

@@ -6,6 +6,7 @@
 #include <stb_image.h>
 #include <filesystem.h>
 #include <gui.h>
+#include <functional>
 
 // glm
 #include <glm/glm.hpp>
@@ -105,6 +106,10 @@ struct Stroke
 
 std::vector<Stroke> strokes;
 
+void clear(){
+    strokes.clear();
+}
+
 int main()
 {
 
@@ -191,7 +196,7 @@ int main()
         // imgui
         Gui::BeginFrame();
 
-        Gui::DrawMenu(draw, brushRadius, brushColor);
+        Gui::DrawMenu(draw, brushRadius, brushColor,clear);
         if (draw)
         {
             for (Stroke &s : strokes)
