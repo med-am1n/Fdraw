@@ -44,6 +44,10 @@ bool selection = false;
 glm::vec2 minSelectedArea(FLT_MAX);
 glm::vec2 maxSelectedArea(-FLT_MAX);
 
+float brushRadius = 5.0f;
+glm::vec4 brushColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+
 struct Mesh
 {
     unsigned int VAO;
@@ -186,7 +190,7 @@ int main()
         // imgui
         Gui::BeginFrame();
 
-        Gui::DrawMenu(draw);
+        Gui::DrawMenu(draw, brushRadius, brushColor);
         if (draw)
         {
             for (Stroke &s : strokes)
@@ -209,7 +213,7 @@ int main()
                         float t = static_cast<float>(i) / numSamples;
                         float vx = prevX + (xpos - prevX) * t;
                         float vy = prevY + (ypos - prevY) * t;
-                        Point circle(&circleMesh, glm::vec2(vx, vy), 1.0f, "circle");
+                        Point circle(&circleMesh, glm::vec2(vx, vy), brushRadius, "circle");
                         circle.strokId = currentStrokeId;
                         strokes[strokes.size() - 1].points.push_back(circle);
                     }
@@ -380,7 +384,7 @@ int main()
             {
                 shader.use();
                 shader.setVec4("color", s.selected ? glm::vec4(1.0f, 0.3f, 0.3f, 1.0f)
-                                                   : glm::vec4(1.0f, 1.0f, 1.0f, 1.0f));
+                                                   : brushColor);
                 p.Draw(shader);
             }
         }

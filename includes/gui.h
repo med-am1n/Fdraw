@@ -4,14 +4,16 @@
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
+#include <glm/gtc/type_ptr.hpp>
+
 
 // no need to include glfw3.h here
 struct GLFWwindow;
 
-namespace Gui 
+namespace Gui
 {
     // call once before the rendering loop!
-    inline void Init(GLFWwindow* window, const char* glsl_version = "#version 330") 
+    inline void Init(GLFWwindow *window, const char *glsl_version = "#version 330")
     {
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -22,7 +24,7 @@ namespace Gui
     }
 
     // call at the start of every frame.
-    inline void BeginFrame() 
+    inline void BeginFrame()
     {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
@@ -30,31 +32,52 @@ namespace Gui
     }
 
     // custom menu
-    inline void DrawMenu(bool& draw) 
+    inline void DrawMenu(bool &draw, float &radius, glm::vec4 &color)
     {
         ImGui::Begin("Menu");
 
-        if (ImGui::Button("Change mode")) {
+        if (ImGui::Button("Change mode"))
+        {
             draw = !draw;
         }
-        ImGui::Text("Mode : %s", draw ? "draw" : "select");
-        ImGui::Separator();
-        ImGuiIO& io = ImGui::GetIO();
-        ImGui::Text("Application average %.1f FPS", io.Framerate);
-        ImGui::Text("Frame time: %.3f ms/frame", 1000.0f / io.Framerate);
+
+        ImGui::SameLine();
+
+        ImGui::Text("Mode: %s", draw ? "Draw" : "Select");
+
+        ImGui::SameLine();
+
+        ImGui::SetNextItemWidth(100.0f);
+        ImGui::SliderFloat("Radius", &radius, 1.0f, 30.0f);
+
+        ImGui::SameLine();
+
+        ImGui::ColorEdit4(
+            "Color",
+            glm::value_ptr(color),
+            ImGuiColorEditFlags_NoInputs);
+
+        ImGui::SameLine();
+
+        ImGuiIO &io = ImGui::GetIO();
+        ImGui::Text("FPS: %.1f", io.Framerate);
+
+        ImGui::SameLine();
+
+        ImGui::Text("%.3f ms/frame", 1000.0f / io.Framerate);
 
         ImGui::End();
     }
 
     // call at the end of every frame
-    inline void EndFrame() 
+    inline void EndFrame()
     {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
 
     // call once after the rendering loop!
-    inline void Shutdown() 
+    inline void Shutdown()
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
