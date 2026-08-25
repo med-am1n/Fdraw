@@ -255,7 +255,7 @@ int main()
 
         DrawMenu(currentmode, brushRadius, brushColor, clear);
         if (currentmode == Mode::Draw)
-        {
+        {   hasSelectedArea = false;
             for (Stroke &s : strokes)
             {
                 s.selected = false;
