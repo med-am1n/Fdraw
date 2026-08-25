@@ -316,14 +316,14 @@ int main()
                 {
                     s.selected = true;
 
-                    for (Point &p : s.points)
+                    for (const Point &p : s.points)
                     {
                         glm::vec2 pos = p.position;
 
-                        if (pos.x < minPos.x ||
-                            pos.x > maxPos.x ||
-                            pos.y < minPos.y ||
-                            pos.y > maxPos.y)
+                        if (pos.x - p.radius < minPos.x ||
+                            pos.x + p.radius > maxPos.x ||
+                            pos.y - p.radius < minPos.y ||
+                            pos.y + p.radius > maxPos.y)
                         {
                             s.selected = false;
                             break;
