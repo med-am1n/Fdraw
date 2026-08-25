@@ -35,6 +35,7 @@ bool hasPreviousPosition = false;
 bool draw = true;
 glm::vec2 selectionStart(0.0f);
 glm::vec2 selectionEnd(0.0f);
+glm::vec2 previousMousePos;
 
 bool draging = false;
 bool selection = false;
@@ -226,25 +227,27 @@ int main()
                 std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
                 if (leftMouseDown && !selection)
                 {
+                    if (!draging)
+                    {
+                        draging = true;
+                        previousMousePos = mousePos;
+                    }
+
                     std::cout << "click in slected Area\n";
-                    draging = true;
-                    float dragingValue=5; // to be claculated later
+                    glm::vec2 delta = mousePos - previousMousePos;
                     for (Stroke &s : strokes)
                     {
                         if (s.selected == true)
                         {
                             for (Point &p : s.points)
                             {
-                                p.position.x +=dragingValue;
-                                p.position.y +=dragingValue;
+                                p.position += delta;
                             }
                         }
                     }
-                    minPos.x += dragingValue;
-                    maxPos.x += dragingValue;
-                    minPos.y += dragingValue;
-                    maxPos.y += dragingValue;
-
+                    minPos += delta;
+                    maxPos += delta;
+                    previousMousePos = mousePos;
                 }
             }
 
@@ -441,8 +444,10 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
         else if (action == GLFW_RELEASE)
         {
             leftMouseDown = false;
-            if(selection) selection=false;
-            if(draging) draging = false;
+            if (selection)
+                selection = false;
+            if (draging)
+                draging = false;
         }
     }
 }
