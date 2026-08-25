@@ -132,17 +132,32 @@ void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<v
 
     if (ImGui::Button("Draw"))
     {
-        mode=Mode::Draw;
+        mode = Mode::Draw;
     }
 
     ImGui::SameLine();
 
     if (ImGui::Button("Select"))
     {
-        mode=Mode::Select;
+        mode = Mode::Select;
     }
 
-    ImGui::Text("Mode: %s", (mode==Mode::Draw) ? "Draw" : "Select");
+    ImGui::SameLine();
+
+    if (ImGui::Button("Erase"))
+    {
+        mode = Mode::Erase;
+    }
+
+    const char *modeText = "Unknown";
+    if (mode == Mode::Draw)
+        modeText = "Draw";
+    if (mode == Mode::Select)
+        modeText = "Select";
+    if (mode == Mode::Erase)
+        modeText = "Erase";
+
+    ImGui::Text("Mode: %s", modeText);
 
     ImGui::SameLine();
 
@@ -255,7 +270,8 @@ int main()
 
         DrawMenu(currentmode, brushRadius, brushColor, clear);
         if (currentmode == Mode::Draw)
-        {   hasSelectedArea = false;
+        {
+            hasSelectedArea = false;
             for (Stroke &s : strokes)
             {
                 s.selected = false;
@@ -289,6 +305,33 @@ int main()
             else
             {
                 hasPreviousPosition = false;
+            }
+        }
+
+        if (currentmode == Mode::Erase)
+        {
+            hasSelectedArea = false;
+            if (leftMouseDown)
+            {
+                double xpos, ypos;
+                glfwGetCursorPos(window, &xpos, &ypos);
+                glm::vec2 mousePos((float)xpos, (float)ypos);
+                float eraserRadius = 10.0f;
+                strokes.erase(
+                    std::remove_if( strokes.begin(), strokes.end(), [&](const Stroke &s)
+                        {
+                            for (const Point &p : s.points)
+                            {
+                                float distance = glm::distance(p.position, mousePos);
+
+                                if (distance <= p.radius + eraserRadius)
+                                {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        }),
+                    strokes.end());
             }
         }
 
