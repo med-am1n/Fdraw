@@ -36,6 +36,7 @@ bool draw = true;
 glm::vec2 selectionStart(0.0f);
 glm::vec2 selectionEnd(0.0f);
 glm::vec2 previousMousePos;
+bool hasSelectedArea = false;
 
 bool dragging = false;
 bool selection = false;
@@ -153,9 +154,22 @@ int main()
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
+    // slected Area rectangle
+    unsigned int selectedVAO, selectedVBO;
+    glGenVertexArrays(1, &selectedVAO);
+    glGenBuffers(1, &selectedVBO);
+    glBindVertexArray(selectedVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, selectedVBO);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(glm::vec2), nullptr, GL_DYNAMIC_DRAW);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), (void *)0);
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+
     // build and compile the shader program
     Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
     Shader selectShader("../src/shaders/selectShader.vs", "../src/shaders/selectShader.fs");
+    Shader selectedShader("../src/shaders/selectedShader.vs", "../src/shaders/selectedShader.fs");
     circleMesh = CreateCircle(1.0f, 100);
 
     glEnable(GL_DEPTH_TEST);
@@ -309,6 +323,7 @@ int main()
                     }
                     if (s.selected)
                     {
+                        hasSelectedArea = true;
                         for (const Point &p : s.points)
                         {
                             minSelectedArea.x = std::min(minSelectedArea.x, p.position.x);
@@ -321,6 +336,33 @@ int main()
                 }
             }
         }
+
+        glm::vec2 selectedAreaVertices[] = {
+            {minSelectedArea.x, minSelectedArea.y},
+            {maxSelectedArea.x, minSelectedArea.y},
+            {maxSelectedArea.x, maxSelectedArea.y},
+            {minSelectedArea.x, maxSelectedArea.y}};
+
+        glBindVertexArray(selectedVAO);
+        glBindBuffer(GL_ARRAY_BUFFER, selectedVBO);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(selectedAreaVertices), selectedAreaVertices);
+        glBindVertexArray(0);
+
+        selectedShader.use();
+
+        glm::mat4 model = glm::mat4(1.0f);
+
+        selectedShader.setMat4("model", model);
+        selectedShader.setMat4("projection", projection);
+
+        glBindVertexArray(selectedVAO);
+
+        glLineWidth(2.0f);
+
+        glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+        glBindVertexArray(0);
+
         for (Stroke &s : strokes)
         {
             for (Point &p : s.points)
