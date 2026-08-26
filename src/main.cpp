@@ -487,10 +487,10 @@ int main()
 
                 for (auto &texture : textures)
                 { // h and w of the img shoulb taken in count
-                    if (texture.position.x >= minPos.x &&
-                        texture.position.x <= maxPos.x &&
-                        texture.position.y >= minPos.y &&
-                        texture.position.y <= maxPos.y)
+                    if (texture.position.x - texture.width >= minPos.x &&
+                        texture.position.x + texture.width <= maxPos.x &&
+                        texture.position.y - texture.height >= minPos.y &&
+                        texture.position.y + texture.height <= maxPos.y)
                     {
                         texture.selected = true;
                         std::cout << "textureSelected = " << texture.selected << std::endl;
@@ -524,6 +524,17 @@ int main()
 
                             maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x + p.radius);
                             maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y + p.radius);
+                        }
+                    }
+                    for (auto &texture : textures)
+                    {
+                        if (texture.selected)
+                        {
+                            minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width);
+                            minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height);
+
+                            maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width);
+                            maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height);
                         }
                     }
                 }
@@ -678,8 +689,8 @@ Texture LoadTexture(const char *path)
     }
     Texture texture;
     texture.id = textureID;
-    texture.width = width /10;
-    texture.height = height/10;
+    texture.width = width / 10;
+    texture.height = height / 10;
     return texture;
 }
 
