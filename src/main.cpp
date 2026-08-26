@@ -47,6 +47,10 @@ glm::vec2 selectionEnd(0.0f);
 glm::vec2 previousMousePos;
 bool hasSelectedArea = false;
 
+// center
+glm::vec2 texturePosition(windowWidth / 2.0f, windowHeight / 2.0f);
+bool textureSelected = false;
+
 bool dragging = false;
 bool selection = false;
 
@@ -455,6 +459,17 @@ int main()
                 glDrawArrays(GL_LINE_LOOP, 0, 4);
 
                 glBindVertexArray(0);
+
+                //h and w of the img shoulb taken in count
+                if (texturePosition.x  >= minPos.x &&
+                    texturePosition.x  <= maxPos.x &&
+                    texturePosition.y  >= minPos.y &&
+                    texturePosition.y  <= maxPos.y)
+                {
+                    textureSelected = true;
+                    std::cout<<"textureSelected = "<<textureSelected<<std::endl;
+                }
+
                 for (Stroke &s : strokes)
                 {
                     s.selected = true;
@@ -541,7 +556,7 @@ int main()
         float imageWidth = 300.0f;
         float imageHeight = 300.0f;
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(windowWidth / 2.0f, windowHeight / 2.0f, 0.0f));
+        model = glm::translate(model, glm::vec3(texturePosition, 0.0f));
         model = glm::scale(model, glm::vec3(imageWidth / 2.0f, imageHeight / 2.0f, 1.0f));
         imgShader.setMat4("projection", projection);
         imgShader.setMat4("model", model);
