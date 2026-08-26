@@ -443,6 +443,13 @@ int main()
                                 }
                             }
                         }
+
+                        for (auto &texture : textures)
+                        {
+                            if(texture.selected){
+                                texture.position+= delta;
+                            }
+                        }
                         minSelectedArea += delta;
                         maxSelectedArea += delta;
                         previousMousePos = mousePos;
