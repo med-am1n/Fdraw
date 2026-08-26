@@ -116,26 +116,46 @@ struct Stroke
     bool selected = false;
 };
 
-struct Texture{
+struct Texture
+{
     glm::vec2 position = center;
-    unsigned int textureId;
-    bool selected =false;
+    unsigned int id;
+    bool selected = false;
     float width, height;
 };
 
 Texture LoadTexture(const char *path);
 
-
 std::vector<Stroke> strokes;
+std::vector<Texture> textures;
 
 void clear()
 {
     strokes.clear();
+    textures.clear();
 }
 
 void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<void()> &clear)
 {
     ImGui::Begin("Menu");
+    static char texturePath[512] = "";
+
+    ImGui::InputText("Image Path", texturePath, sizeof(texturePath));
+    ImGui::SameLine();
+    if (ImGui::Button("Load Texture"))
+    {
+        if (texturePath[0] != '\0')
+        {
+            Texture texture = LoadTexture(texturePath);
+
+            if (texture.id != 0)
+            {
+                textures.push_back(texture);
+            }
+        }
+    }
+
+    ImGui::Separator();
 
     if (ImGui::Button("Clear"))
     {
@@ -291,7 +311,6 @@ int main()
     Shader cursorShader("../src/shaders/cursorShader.vs", "../src/shaders/cursorShader.fs");
     Shader imgShader("../src/shaders/imgShader.vs", "../src/shaders/imgShader.fs");
 
-    Texture texture = LoadTexture("/Users/ahmed/Downloads/clogo.png");
     imgShader.use();
     imgShader.setInt("texture.textureId", 0);
 
@@ -380,9 +399,6 @@ int main()
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture.textureId);
-
         // rendering commands here
         glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
         shader.use();
@@ -468,14 +484,17 @@ int main()
                 glDrawArrays(GL_LINE_LOOP, 0, 4);
 
                 glBindVertexArray(0);
-                //h and w of the img shoulb taken in count
-                if (texture.position.x  >= minPos.x &&
-                    texture.position.x  <= maxPos.x &&
-                    texture.position.y  >= minPos.y &&
-                    texture.position.y  <= maxPos.y)
-                {
-                    texture.selected = true;
-                    std::cout<<"textureSelected = "<<texture.selected<<std::endl;
+
+                for (auto &texture : textures)
+                { // h and w of the img shoulb taken in count
+                    if (texture.position.x >= minPos.x &&
+                        texture.position.x <= maxPos.x &&
+                        texture.position.y >= minPos.y &&
+                        texture.position.y <= maxPos.y)
+                    {
+                        texture.selected = true;
+                        std::cout << "textureSelected = " << texture.selected << std::endl;
+                    }
                 }
 
                 for (Stroke &s : strokes)
@@ -559,19 +578,22 @@ int main()
             }
         }
 
-        // img
-        imgShader.use();
-        float imageWidth = 300.0f;
-        float imageHeight = 300.0f;
-        glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(texture.position, 0.0f));
-        model = glm::scale(model, glm::vec3(imageWidth / 2.0f, imageHeight / 2.0f, 1.0f));
-        imgShader.setMat4("projection", projection);
-        imgShader.setMat4("model", model);
-        glBindVertexArray(quadVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
+        for (const auto &texture : textures)
+        {
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, texture.id);
+            imgShader.use();
+            float imageWidth = 300.0f;
+            float imageHeight = 300.0f;
+            glm::mat4 model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(texture.position, 0.0f));
+            model = glm::scale(model, glm::vec3(imageWidth / 2.0f, imageHeight / 2.0f, 1.0f));
+            imgShader.setMat4("projection", projection);
+            imgShader.setMat4("model", model);
+            glBindVertexArray(quadVAO);
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+            glBindVertexArray(0);
+        }
         // imgui
         Gui::EndFrame();
 
@@ -656,8 +678,8 @@ Texture LoadTexture(const char *path)
         std::cout << "Failed to load texture: " << path << std::endl;
         stbi_image_free(data);
     }
-    Texture texture;    
-    texture.textureId = textureID;
+    Texture texture;
+    texture.id = textureID;
     texture.width = width;
     texture.height = height;
     return texture;
