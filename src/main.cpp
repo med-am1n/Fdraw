@@ -721,6 +721,11 @@ void processInput(GLFWwindow *window)
                                      {
         if (s.selected) return true; return false; }),
                       strokes.end());
+
+        textures.erase(std::remove_if(textures.begin(), textures.end(), [&](const Texture &t)
+                                     {
+        if (t.selected) return true; return false; }),
+                      textures.end());
         hasSelectedArea = false;
     }
 }
