@@ -583,11 +583,9 @@ int main()
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, texture.id);
             imgShader.use();
-            float imageWidth = 300.0f;
-            float imageHeight = 300.0f;
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(texture.position, 0.0f));
-            model = glm::scale(model, glm::vec3(imageWidth / 2.0f, imageHeight / 2.0f, 1.0f));
+            model = glm::scale(model, glm::vec3(texture.width, texture.height, 1.0f));
             imgShader.setMat4("projection", projection);
             imgShader.setMat4("model", model);
             glBindVertexArray(quadVAO);
@@ -680,8 +678,8 @@ Texture LoadTexture(const char *path)
     }
     Texture texture;
     texture.id = textureID;
-    texture.width = width;
-    texture.height = height;
+    texture.width = width /10;
+    texture.height = height/10;
     return texture;
 }
 
