@@ -21,7 +21,7 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
 GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb, GLFWmousebuttonfun button_cb, GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
-unsigned int LoadTexture(const char *path);
+
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
@@ -48,8 +48,7 @@ glm::vec2 previousMousePos;
 bool hasSelectedArea = false;
 
 // center
-glm::vec2 texturePosition(windowWidth / 2.0f, windowHeight / 2.0f);
-bool textureSelected = false;
+glm::vec2 center(windowWidth / 2.0f, windowHeight / 2.0f);
 
 bool dragging = false;
 bool selection = false;
@@ -116,6 +115,16 @@ struct Stroke
     std::vector<Point> points;
     bool selected = false;
 };
+
+struct Texture{
+    glm::vec2 position = center;
+    unsigned int textureId;
+    bool selected =false;
+    float width, height;
+};
+
+Texture LoadTexture(const char *path);
+
 
 std::vector<Stroke> strokes;
 
@@ -282,9 +291,9 @@ int main()
     Shader cursorShader("../src/shaders/cursorShader.vs", "../src/shaders/cursorShader.fs");
     Shader imgShader("../src/shaders/imgShader.vs", "../src/shaders/imgShader.fs");
 
-    unsigned int texture1 = LoadTexture("/Users/ahmed/Downloads/clogo.png");
+    Texture texture = LoadTexture("/Users/ahmed/Downloads/clogo.png");
     imgShader.use();
-    imgShader.setInt("texture1", 0);
+    imgShader.setInt("texture.textureId", 0);
 
     circleMesh = CreateCircle(1.0f, 100);
     Mesh cursorMesh = CreateCircle(1.0f, 64);
@@ -372,7 +381,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture1);
+        glBindTexture(GL_TEXTURE_2D, texture.textureId);
 
         // rendering commands here
         glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
@@ -459,15 +468,14 @@ int main()
                 glDrawArrays(GL_LINE_LOOP, 0, 4);
 
                 glBindVertexArray(0);
-
                 //h and w of the img shoulb taken in count
-                if (texturePosition.x  >= minPos.x &&
-                    texturePosition.x  <= maxPos.x &&
-                    texturePosition.y  >= minPos.y &&
-                    texturePosition.y  <= maxPos.y)
+                if (texture.position.x  >= minPos.x &&
+                    texture.position.x  <= maxPos.x &&
+                    texture.position.y  >= minPos.y &&
+                    texture.position.y  <= maxPos.y)
                 {
-                    textureSelected = true;
-                    std::cout<<"textureSelected = "<<textureSelected<<std::endl;
+                    texture.selected = true;
+                    std::cout<<"textureSelected = "<<texture.selected<<std::endl;
                 }
 
                 for (Stroke &s : strokes)
@@ -556,7 +564,7 @@ int main()
         float imageWidth = 300.0f;
         float imageHeight = 300.0f;
         glm::mat4 model = glm::mat4(1.0f);
-        model = glm::translate(model, glm::vec3(texturePosition, 0.0f));
+        model = glm::translate(model, glm::vec3(texture.position, 0.0f));
         model = glm::scale(model, glm::vec3(imageWidth / 2.0f, imageHeight / 2.0f, 1.0f));
         imgShader.setMat4("projection", projection);
         imgShader.setMat4("model", model);
@@ -609,7 +617,7 @@ GLFWwindow *startGLFW(int width, int height, const char *title,
     return window;
 }
 
-unsigned int LoadTexture(const char *path)
+Texture LoadTexture(const char *path)
 {
     unsigned int textureID;
     glGenTextures(1, &textureID);
@@ -648,8 +656,11 @@ unsigned int LoadTexture(const char *path)
         std::cout << "Failed to load texture: " << path << std::endl;
         stbi_image_free(data);
     }
-
-    return textureID;
+    Texture texture;    
+    texture.textureId = textureID;
+    texture.width = width;
+    texture.height = height;
+    return texture;
 }
 
 void processInput(GLFWwindow *window)
