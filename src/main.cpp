@@ -319,9 +319,9 @@ int main()
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
                 glm::vec2 mousePos((float)xpos, (float)ypos);
-                
+
                 strokes.erase(std::remove_if(strokes.begin(), strokes.end(), [&](const Stroke &s)
-                        {
+                                             {
                             for (const Point &p : s.points)
                             {
                                 float distance = glm::distance(p.position, mousePos);
@@ -332,7 +332,7 @@ int main()
                                 }
                             }
                             return false; }),
-                    strokes.end());
+                              strokes.end());
             }
         }
 
@@ -461,7 +461,7 @@ int main()
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
             glm::vec2 mousePos((float)xpos, (float)ypos);
-            glm::vec4 cursorColor= (currentmode == Mode::Draw)? brushColor : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            glm::vec4 cursorColor = (currentmode == Mode::Draw) ? brushColor : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
             DrawToolCursor(shader, cursorMesh, mousePos, brushRadius, cursorColor);
         }
         if (hasSelectedArea)
@@ -596,6 +596,15 @@ void processInput(GLFWwindow *window)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
+    {
+        strokes.erase(std::remove_if(strokes.begin(), strokes.end(), [&](const Stroke &s)
+                                     {
+        if (s.selected) return true; return false; }),
+                      strokes.end());
+        hasSelectedArea = false;
+    }
 }
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
