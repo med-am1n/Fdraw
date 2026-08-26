@@ -63,6 +63,7 @@ struct Mesh
     std::vector<float> vertices;
 };
 Mesh CreateCircle(float radius, int res);
+void DrawToolCursor(Shader &shader, Mesh &mesh, const glm::vec2 &position, float radius, const glm::vec4 &color);
 
 class Point
 {
@@ -252,7 +253,9 @@ int main()
     Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
     Shader selectShader("../src/shaders/selectShader.vs", "../src/shaders/selectShader.fs");
     Shader selectedShader("../src/shaders/selectedShader.vs", "../src/shaders/selectedShader.fs");
+    Shader cursorShader("../src/shaders/cursorShader.vs", "../src/shaders/cursorShader.fs");
     circleMesh = CreateCircle(1.0f, 100);
+    Mesh cursorMesh = CreateCircle(1.0f, 64);
 
     glEnable(GL_DEPTH_TEST);
     int currentStrokeId = 0;
@@ -316,21 +319,19 @@ int main()
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
                 glm::vec2 mousePos((float)xpos, (float)ypos);
-                float eraserRadius = 10.0f;
-                strokes.erase(
-                    std::remove_if( strokes.begin(), strokes.end(), [&](const Stroke &s)
+                
+                strokes.erase(std::remove_if(strokes.begin(), strokes.end(), [&](const Stroke &s)
                         {
                             for (const Point &p : s.points)
                             {
                                 float distance = glm::distance(p.position, mousePos);
 
-                                if (distance <= p.radius + eraserRadius)
+                                if (distance <= p.radius + brushRadius)
                                 {
                                     return true;
                                 }
                             }
-                            return false;
-                        }),
+                            return false; }),
                     strokes.end());
             }
         }
@@ -455,6 +456,14 @@ int main()
             }
         }
 
+        if (currentmode == Mode::Erase || currentmode == Mode::Draw)
+        {
+            double xpos, ypos;
+            glfwGetCursorPos(window, &xpos, &ypos);
+            glm::vec2 mousePos((float)xpos, (float)ypos);
+            glm::vec4 cursorColor= (currentmode == Mode::Draw)? brushColor : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+            DrawToolCursor(shader, cursorMesh, mousePos, brushRadius, cursorColor);
+        }
         if (hasSelectedArea)
         {
             glm::vec2 selectedAreaVertices[] = {
@@ -680,4 +689,18 @@ Mesh CreateCircle(float radius, int res)
     glEnableVertexAttribArray(0);
 
     return mesh;
+}
+
+void DrawToolCursor(Shader &shader, Mesh &mesh, const glm::vec2 &position, float radius, const glm::vec4 &color)
+{
+    shader.use();
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, glm::vec3(position, 0.0f));
+    model = glm::scale(model, glm::vec3(radius, radius, 1.0f));
+    shader.setMat4("model", model);
+    shader.setVec4("color", color);
+    glBindVertexArray(mesh.VAO);
+    // Skip vertex 0 because it is the center.
+    glDrawArrays(GL_LINE_STRIP, 1, mesh.vertices.size() / 3 - 1);
+    glBindVertexArray(0);
 }
