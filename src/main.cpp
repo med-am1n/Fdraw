@@ -249,11 +249,39 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    // img
+    float quadVertices[] = {
+        1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+
+        1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+
+    unsigned int quadVAO, quadVBO;
+    glGenVertexArrays(1, &quadVAO);
+    glGenBuffers(1, &quadVBO);
+    glBindVertexArray(quadVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glBindVertexArray(0);
+
     // build and compile the shader program
     Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
     Shader selectShader("../src/shaders/selectShader.vs", "../src/shaders/selectShader.fs");
     Shader selectedShader("../src/shaders/selectedShader.vs", "../src/shaders/selectedShader.fs");
     Shader cursorShader("../src/shaders/cursorShader.vs", "../src/shaders/cursorShader.fs");
+    Shader imgShader("../src/shaders/imgShader.vs", "../src/shaders/imgShader.fs");
+
+    unsigned int texture1 = LoadTexture("/Users/ahmed/Downloads/clogo.png");
+    imgShader.use();
+    imgShader.setInt("texture1", 0);
+
     circleMesh = CreateCircle(1.0f, 100);
     Mesh cursorMesh = CreateCircle(1.0f, 64);
 
@@ -338,6 +366,10 @@ int main()
 
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture1);
+
         // rendering commands here
         glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
         shader.use();
@@ -503,6 +535,19 @@ int main()
                 p.Draw(shader);
             }
         }
+
+        // img
+        imgShader.use();
+        float imageWidth = 300.0f;
+        float imageHeight = 300.0f;
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(windowWidth / 2.0f, windowHeight / 2.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(imageWidth / 2.0f, imageHeight / 2.0f, 1.0f));
+        imgShader.setMat4("projection", projection);
+        imgShader.setMat4("model", model);
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glBindVertexArray(0);
 
         // imgui
         Gui::EndFrame();
