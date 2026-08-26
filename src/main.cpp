@@ -339,6 +339,10 @@ int main()
             {
                 s.selected = false;
             }
+            for (auto &texture : textures)
+            {
+                texture.selected = false;
+            }
             if (leftMouseDown)
             {
                 double xpos, ypos;
@@ -455,6 +459,11 @@ int main()
                 for (Stroke &s : strokes)
                 {
                     s.selected = false;
+                }
+
+                for (auto &texture : textures)
+                {
+                    texture.selected = false;
                 }
 
                 glDisable(GL_DEPTH_TEST);
