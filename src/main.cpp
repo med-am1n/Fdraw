@@ -446,8 +446,9 @@ int main()
 
                         for (auto &texture : textures)
                         {
-                            if(texture.selected){
-                                texture.position+= delta;
+                            if (texture.selected)
+                            {
+                                texture.position += delta;
                             }
                         }
                         minSelectedArea += delta;
@@ -723,9 +724,9 @@ void processInput(GLFWwindow *window)
                       strokes.end());
 
         textures.erase(std::remove_if(textures.begin(), textures.end(), [&](const Texture &t)
-                                     {
+                                      {
         if (t.selected) return true; return false; }),
-                      textures.end());
+                       textures.end());
         hasSelectedArea = false;
     }
 }
@@ -764,8 +765,11 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             glfwGetCursorPos(window, &xpos, &ypos);
             selectionStart = glm::vec2(xpos, ypos);
             selectionEnd = selectionStart;
-            Stroke currentStroke;
-            strokes.push_back(currentStroke);
+            if (currentmode == Mode::Draw)
+            {
+                Stroke currentStroke;
+                strokes.push_back(currentStroke);
+            }
         }
         else if (action == GLFW_RELEASE)
         {
