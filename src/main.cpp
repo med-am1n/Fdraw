@@ -114,8 +114,8 @@ struct Stroke
 {
     std::vector<Point> points;
     bool selected = false;
-    glm::vec2 maxArea{FLT_MAX, FLT_MAX};
-    glm::vec2 minArea{-FLT_MAX, -FLT_MAX};
+    glm::vec2 maxArea{-FLT_MAX, -FLT_MAX};
+    glm::vec2 minArea{FLT_MAX, FLT_MAX};
 
     Stroke() = default;
 };
@@ -366,6 +366,11 @@ int main()
                         Point circle(&circleMesh, glm::vec2(vx, vy), brushRadius, "circle", brushColor);
                         circle.strokId = currentStrokeId;
                         strokes[strokes.size() - 1].points.push_back(circle);
+
+                        stroke.minArea.x = std::min(stroke.minArea.x, circle.position.x - circle.radius);
+                        stroke.minArea.y = std::min(stroke.minArea.y, circle.position.y - circle.radius);
+                        stroke.maxArea.x = std::max(stroke.maxArea.x, circle.position.x + circle.radius);
+                        stroke.maxArea.y = std::max(stroke.maxArea.y, circle.position.y + circle.radius);
                     }
                 }
 
@@ -430,7 +435,6 @@ int main()
                         dragging = true;
                         previousMousePos = mousePos;
                     }
-
                 }
                 if (dragging)
                 {
