@@ -467,100 +467,103 @@ int main()
                 }
             }
 
-            if (leftMouseDown && !dragging)
+            if (!dragging)
             {
-                selection = true;
-                minSelectedArea = glm::vec2(FLT_MAX);
-                maxSelectedArea = glm::vec2(-FLT_MAX);
-
-                for (Stroke &s : strokes)
+                if (leftMouseDown)
                 {
-                    s.selected = false;
-                }
+                    selection = true;
+                    minSelectedArea = glm::vec2(FLT_MAX);
+                    maxSelectedArea = glm::vec2(-FLT_MAX);
 
-                for (auto &texture : textures)
-                {
-                    texture.selected = false;
-                }
-
-                glDisable(GL_DEPTH_TEST);
-                double xpos, ypos;
-                glfwGetCursorPos(window, &xpos, &ypos);
-                selectionEnd = glm::vec2(xpos, ypos);
-
-                glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
-                glm::vec2 size = glm::abs(selectionEnd - selectionStart);
-
-                glm::vec2 minPos = glm::min(selectionStart, selectionEnd);
-                glm::vec2 maxPos = glm::max(selectionStart, selectionEnd);
-
-                glm::mat4 model = glm::mat4(1.0f);
-                model = glm::translate(model, glm::vec3(center, 0.0f));
-                model = glm::scale(model, glm::vec3(size, 1.0f));
-
-                selectShader.use();
-                selectShader.setMat4("model", model);
-                selectShader.setMat4("projection", projection);
-
-                glBindVertexArray(selectVAO);
-                glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-
-                // border
-                glLineWidth(2.0f);
-                glDrawArrays(GL_LINE_LOOP, 0, 4);
-
-                glBindVertexArray(0);
-
-                for (auto &texture : textures)
-                { // h and w of the img shoulb taken in count
-                    if (texture.position.x - texture.width >= minPos.x &&
-                        texture.position.x + texture.width <= maxPos.x &&
-                        texture.position.y - texture.height >= minPos.y &&
-                        texture.position.y + texture.height <= maxPos.y)
+                    for (Stroke &s : strokes)
                     {
-                        texture.selected = true;
-                        std::cout << "textureSelected = " << texture.selected << std::endl;
+                        s.selected = false;
                     }
-                }
 
-                for (Stroke &s : strokes)
-                {
-                    s.selected = true;
-
-                    for (const Point &p : s.points)
-                    {
-                        glm::vec2 pos = p.position;
-
-                        if (pos.x - p.radius < minPos.x ||
-                            pos.x + p.radius > maxPos.x ||
-                            pos.y - p.radius < minPos.y ||
-                            pos.y + p.radius > maxPos.y)
-                        {
-                            s.selected = false;
-                            break;
-                        }
-                    }
-                    if (s.selected)
-                    {
-                        hasSelectedArea = true;
-                        for (const Point &p : s.points)
-                        {
-                            minSelectedArea.x = std::min(minSelectedArea.x, p.position.x - p.radius);
-                            minSelectedArea.y = std::min(minSelectedArea.y, p.position.y - p.radius);
-
-                            maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x + p.radius);
-                            maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y + p.radius);
-                        }
-                    }
                     for (auto &texture : textures)
                     {
-                        if (texture.selected)
-                        {
-                            minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width);
-                            minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height);
+                        texture.selected = false;
+                    }
 
-                            maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width);
-                            maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height);
+                    glDisable(GL_DEPTH_TEST);
+                    double xpos, ypos;
+                    glfwGetCursorPos(window, &xpos, &ypos);
+                    selectionEnd = glm::vec2(xpos, ypos);
+
+                    glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
+                    glm::vec2 size = glm::abs(selectionEnd - selectionStart);
+
+                    glm::vec2 minPos = glm::min(selectionStart, selectionEnd);
+                    glm::vec2 maxPos = glm::max(selectionStart, selectionEnd);
+
+                    glm::mat4 model = glm::mat4(1.0f);
+                    model = glm::translate(model, glm::vec3(center, 0.0f));
+                    model = glm::scale(model, glm::vec3(size, 1.0f));
+
+                    selectShader.use();
+                    selectShader.setMat4("model", model);
+                    selectShader.setMat4("projection", projection);
+
+                    glBindVertexArray(selectVAO);
+                    glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+
+                    // border
+                    glLineWidth(2.0f);
+                    glDrawArrays(GL_LINE_LOOP, 0, 4);
+
+                    glBindVertexArray(0);
+
+                    for (auto &texture : textures)
+                    { // h and w of the img shoulb taken in count
+                        if (texture.position.x - texture.width >= minPos.x &&
+                            texture.position.x + texture.width <= maxPos.x &&
+                            texture.position.y - texture.height >= minPos.y &&
+                            texture.position.y + texture.height <= maxPos.y)
+                        {
+                            texture.selected = true;
+                            std::cout << "textureSelected = " << texture.selected << std::endl;
+                        }
+                    }
+
+                    for (Stroke &s : strokes)
+                    {
+                        s.selected = true;
+
+                        for (const Point &p : s.points)
+                        {
+                            glm::vec2 pos = p.position;
+
+                            if (pos.x - p.radius < minPos.x ||
+                                pos.x + p.radius > maxPos.x ||
+                                pos.y - p.radius < minPos.y ||
+                                pos.y + p.radius > maxPos.y)
+                            {
+                                s.selected = false;
+                                break;
+                            }
+                        }
+                        if (s.selected)
+                        {
+                            hasSelectedArea = true;
+                            for (const Point &p : s.points)
+                            {
+                                minSelectedArea.x = std::min(minSelectedArea.x, p.position.x - p.radius);
+                                minSelectedArea.y = std::min(minSelectedArea.y, p.position.y - p.radius);
+
+                                maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x + p.radius);
+                                maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y + p.radius);
+                            }
+                        }
+                        for (auto &texture : textures)
+                        {
+                            if (texture.selected)
+                            {
+                                minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width);
+                                minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height);
+
+                                maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width);
+                                maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height);
+                            }
                         }
                     }
                 }
