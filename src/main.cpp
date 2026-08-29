@@ -114,6 +114,10 @@ struct Stroke
 {
     std::vector<Point> points;
     bool selected = false;
+    glm::vec2 maxArea{FLT_MAX, FLT_MAX};
+    glm::vec2 minArea{-FLT_MAX, -FLT_MAX};
+
+    Stroke() = default;
 };
 
 struct Texture
@@ -426,6 +430,7 @@ int main()
                         dragging = true;
                         previousMousePos = mousePos;
                     }
+
                 }
                 if (dragging)
                 {
