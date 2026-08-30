@@ -446,8 +446,9 @@ int main()
 
                         for (auto &texture : textures)
                         {
-                            if(texture.selected){
-                                texture.position+= delta;
+                            if (texture.selected)
+                            {
+                                texture.position += delta;
                             }
                         }
                         minSelectedArea += delta;
@@ -459,6 +460,7 @@ int main()
 
             if (!dragging)
             {
+
                 if (leftMouseDown)
                 {
                     selection = true;
@@ -473,6 +475,26 @@ int main()
                     for (auto &texture : textures)
                     {
                         texture.selected = false;
+                    }
+
+                    for (auto &texture : textures)
+                    {
+                        float left = texture.position.x - texture.width * 0.5f;
+                        float right = texture.position.x + texture.width * 0.5f;
+                        float top = texture.position.y - texture.height * 0.5f;
+                        float bottom = texture.position.y + texture.height * 0.5f;
+
+                        bool mouseOver =
+                            mousePos.x >= left &&
+                            mousePos.x <= right &&
+                            mousePos.y >= top &&
+                            mousePos.y <= bottom;
+
+                        if (mouseOver)
+                        {
+                            texture.selected = true;
+                            std::cout << "textureSelected = " << texture.selected << std::endl;
+                        }
                     }
 
                     glDisable(GL_DEPTH_TEST);
@@ -726,9 +748,9 @@ void processInput(GLFWwindow *window)
                       strokes.end());
 
         textures.erase(std::remove_if(textures.begin(), textures.end(), [&](const Texture &t)
-                                     {
+                                      {
         if (t.selected) return true; return false; }),
-                      textures.end());
+                       textures.end());
         hasSelectedArea = false;
     }
 }
