@@ -413,47 +413,64 @@ int main()
             glfwGetCursorPos(window, &xpos, &ypos);
             glm::vec2 mousePos = glm::vec2((float)xpos, (float)ypos);
 
-            if (leftMouseDown && !selection)
+            if (!selection)
             {
-                if (!dragging)
+
+                float cornerSize = 20.0f;
+
+                bool mouseOverTopRight =
+                    mousePos.x >= maxSelectedArea.x - cornerSize &&
+                    mousePos.x <= maxSelectedArea.x + cornerSize &&
+                    mousePos.y >= minSelectedArea.y - cornerSize &&
+                    mousePos.y <= minSelectedArea.y + cornerSize;
+
+                if (mouseOverTopRight)
                 {
-                    if (mousePos.x >= minSelectedArea.x &&
-                        mousePos.x <= maxSelectedArea.x &&
-                        mousePos.y >= minSelectedArea.y &&
-                        mousePos.y <= maxSelectedArea.y)
-                    {
-                        std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
-                        dragging = true;
-                        previousMousePos = mousePos;
-                    }
+                    std::cout << "top right corner detected" << std::endl;
                 }
-                if (dragging)
+                
+                if (leftMouseDown)
                 {
-                    if (leftMouseDown && !selection)
+                    if (!dragging)
                     {
-                        std::cout << "click in slected Area\n";
-                        glm::vec2 delta = mousePos - previousMousePos;
-                        for (Stroke &s : strokes)
+                        if (mousePos.x >= minSelectedArea.x &&
+                            mousePos.x <= maxSelectedArea.x &&
+                            mousePos.y >= minSelectedArea.y &&
+                            mousePos.y <= maxSelectedArea.y)
                         {
-                            if (s.selected == true)
+                            std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
+                            dragging = true;
+                            previousMousePos = mousePos;
+                        }
+                    }
+                    if (dragging)
+                    {
+                        if (leftMouseDown && !selection)
+                        {
+                            std::cout << "click in slected Area\n";
+                            glm::vec2 delta = mousePos - previousMousePos;
+                            for (Stroke &s : strokes)
                             {
-                                for (Point &p : s.points)
+                                if (s.selected == true)
                                 {
-                                    p.position += delta;
+                                    for (Point &p : s.points)
+                                    {
+                                        p.position += delta;
+                                    }
                                 }
                             }
-                        }
 
-                        for (auto &texture : textures)
-                        {
-                            if (texture.selected)
+                            for (auto &texture : textures)
                             {
-                                texture.position += delta;
+                                if (texture.selected)
+                                {
+                                    texture.position += delta;
+                                }
                             }
+                            minSelectedArea += delta;
+                            maxSelectedArea += delta;
+                            previousMousePos = mousePos;
                         }
-                        minSelectedArea += delta;
-                        maxSelectedArea += delta;
-                        previousMousePos = mousePos;
                     }
                 }
             }
