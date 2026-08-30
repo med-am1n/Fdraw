@@ -122,6 +122,7 @@ struct Texture
     unsigned int id;
     bool selected = false;
     float width, height;
+    float scaleValue =1;
 };
 
 Texture LoadTexture(const char *path);
@@ -427,8 +428,15 @@ int main()
                 if (mouseOverTopRight)
                 {
                     std::cout << "top right corner detected" << std::endl;
+                    if(leftMouseDown){
+                        for(auto &t : textures){
+                            if(t.selected == true){
+                                t.scaleValue *=1.2;
+                            }
+                        }
+                    }
                 }
-                
+
                 if (leftMouseDown)
                 {
                     if (!dragging)
@@ -496,10 +504,10 @@ int main()
 
                     for (auto &texture : textures)
                     {
-                        float left = texture.position.x - texture.width * 0.5f;
-                        float right = texture.position.x + texture.width * 0.5f;
-                        float top = texture.position.y - texture.height * 0.5f;
-                        float bottom = texture.position.y + texture.height * 0.5f;
+                        float left = texture.position.x - texture.width * texture.scaleValue * 0.5f;
+                        float right = texture.position.x + texture.width * texture.scaleValue * 0.5f;
+                        float top = texture.position.y - texture.height * texture.scaleValue * 0.5f;
+                        float bottom = texture.position.y + texture.height * texture.scaleValue * 0.5f;
 
                         bool mouseOver =
                             mousePos.x >= left &&
@@ -587,11 +595,11 @@ int main()
                         {
                             if (texture.selected)
                             {
-                                minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width);
-                                minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height);
+                                minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width * texture.scaleValue);
+                                minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height * texture.scaleValue);
 
-                                maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width);
-                                maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height);
+                                maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width * texture.scaleValue);
+                                maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height * texture.scaleValue);
                             }
                         }
                     }
@@ -654,7 +662,7 @@ int main()
             imgShader.use();
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(texture.position, 0.0f));
-            model = glm::scale(model, glm::vec3(texture.width, texture.height, 1.0f));
+            model = glm::scale(model, glm::vec3(texture.width * texture.scaleValue , texture.height * texture.scaleValue, 1.0f));
             imgShader.setMat4("projection", projection);
             imgShader.setMat4("model", model);
             glBindVertexArray(quadVAO);
