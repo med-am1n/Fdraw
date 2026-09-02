@@ -3,6 +3,8 @@ build/
 cmake-build-debug/
 cmake-build-release/
 dist/
+# build files
+compile_commands.json
 
 # Compiled objects and libraries
 *.o
