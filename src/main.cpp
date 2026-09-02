@@ -32,7 +32,6 @@ Camera2D camera(glm::vec2(400.0f, 300.0f), 1.0f);
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 bool leftMouseDown = false;
-double prevX, prevY;
 bool hasPreviousPosition = false;
 
 enum class Mode
@@ -349,26 +348,24 @@ int main()
             {
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
+                glm::vec2 currentMousePos = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
                 if (hasPreviousPosition)
                 {
-                    double dx = xpos - prevX;
-                    double dy = ypos - prevY;
-                    double distance = std::sqrt(dx * dx + dy * dy);
-                    int numSamples = std::max(static_cast<int>(distance / 1.0f), 1);
+                    glm::vec2 delta = currentMousePos - previousMousePos;
+                    double distance = glm::length(delta);
+                    int numSamples = std::max(static_cast<int>(distance), 1);
                     Stroke stroke;
                     for (int i = 0; i <= numSamples; ++i)
                     {
                         float t = static_cast<float>(i) / numSamples;
-                        float vx = prevX + (xpos - prevX) * t;
-                        float vy = prevY + (ypos - prevY) * t;
-                        Point circle(&circleMesh, glm::vec2(vx, vy), brushRadius, "circle", brushColor);
+                        glm::vec2 position = previousMousePos + delta * t;
+                        Point circle(&circleMesh, position, brushRadius, "circle", brushColor);
                         circle.strokId = currentStrokeId;
                         strokes[strokes.size() - 1].points.push_back(circle);
                     }
                 }
 
-                prevX = xpos;
-                prevY = ypos;
+                previousMousePos = currentMousePos;
                 hasPreviousPosition = true;
             }
             else
