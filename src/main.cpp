@@ -384,7 +384,7 @@ int main()
             {
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
-                glm::vec2 mousePos((float)xpos, (float)ypos);
+                glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos,(float)ypos), windowWidth, windowHeight);
 
                 strokes.erase(std::remove_if(strokes.begin(), strokes.end(), [&](const Stroke &s)
                                              {
@@ -415,7 +415,7 @@ int main()
         {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            glm::vec2 mousePos = glm::vec2((float)xpos, (float)ypos);
+            glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos,(float)ypos), windowWidth, windowHeight);
 
             if (leftMouseDown && !selection)
             {
@@ -591,7 +591,7 @@ int main()
         {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            glm::vec2 mousePos((float)xpos, (float)ypos);
+            glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos,(float)ypos), windowWidth, windowHeight);
             glm::vec4 cursorColor = (currentmode == Mode::Draw) ? brushColor : glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
             DrawToolCursor(shader, cursorMesh, mousePos, brushRadius, cursorColor);
         }
