@@ -414,71 +414,47 @@ int main()
             glfwGetCursorPos(window, &xpos, &ypos);
             glm::vec2 mousePos = glm::vec2((float)xpos, (float)ypos);
 
-            if (!selection)
+            if (leftMouseDown && !selection)
             {
-
-                float cornerSize = 20.0f;
-
-                bool mouseOverTopRight =
-                    mousePos.x >= maxSelectedArea.x - cornerSize &&
-                    mousePos.x <= maxSelectedArea.x + cornerSize &&
-                    mousePos.y >= minSelectedArea.y - cornerSize &&
-                    mousePos.y <= minSelectedArea.y + cornerSize;
-
-                if (mouseOverTopRight)
+                if (!dragging)
                 {
-                    std::cout << "top right corner detected" << std::endl;
-                    if(leftMouseDown){
-                        for(auto &t : textures){
-                            if(t.selected == true){
-                                t.scaleValue *=1.2;
-                            }
-                        }
+                    if (mousePos.x >= minSelectedArea.x &&
+                        mousePos.x <= maxSelectedArea.x &&
+                        mousePos.y >= minSelectedArea.y &&
+                        mousePos.y <= maxSelectedArea.y)
+                    {
+                        std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
+                        dragging = true;
+                        previousMousePos = mousePos;
                     }
                 }
-
-                if (leftMouseDown)
+                if (dragging)
                 {
-                    if (!dragging)
+                    if (leftMouseDown && !selection)
                     {
-                        if (mousePos.x >= minSelectedArea.x &&
-                            mousePos.x <= maxSelectedArea.x &&
-                            mousePos.y >= minSelectedArea.y &&
-                            mousePos.y <= maxSelectedArea.y)
+                        std::cout << "click in slected Area\n";
+                        glm::vec2 delta = mousePos - previousMousePos;
+                        for (Stroke &s : strokes)
                         {
-                            std::cout << "you are in selected Area: " << xpos << ", " << ypos << std::endl;
-                            dragging = true;
-                            previousMousePos = mousePos;
-                        }
-                    }
-                    if (dragging)
-                    {
-                        if (leftMouseDown && !selection)
-                        {
-                            std::cout << "click in slected Area\n";
-                            glm::vec2 delta = mousePos - previousMousePos;
-                            for (Stroke &s : strokes)
+                            if (s.selected == true)
                             {
-                                if (s.selected == true)
+                                for (Point &p : s.points)
                                 {
-                                    for (Point &p : s.points)
-                                    {
-                                        p.position += delta;
-                                    }
+                                    p.position += delta;
                                 }
                             }
+                        }
 
-                            for (auto &texture : textures)
+                        for (auto &texture : textures)
+                        {
+                            if (texture.selected)
                             {
-                                if (texture.selected)
-                                {
-                                    texture.position += delta;
-                                }
+                                texture.position += delta;
                             }
-                            minSelectedArea += delta;
-                            maxSelectedArea += delta;
-                            previousMousePos = mousePos;
                         }
+                        minSelectedArea += delta;
+                        maxSelectedArea += delta;
+                        previousMousePos = mousePos;
                     }
                 }
             }
