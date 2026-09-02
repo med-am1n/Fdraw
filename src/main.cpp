@@ -47,9 +47,6 @@ glm::vec2 selectionEnd(0.0f);
 glm::vec2 previousMousePos;
 bool hasSelectedArea = false;
 
-// center
-glm::vec2 center(windowWidth / 2.0f, windowHeight / 2.0f);
-
 bool dragging = false;
 bool selection = false;
 
@@ -118,7 +115,7 @@ struct Stroke
 
 struct Texture
 {
-    glm::vec2 position = center;
+    glm::vec2 position;
     unsigned int id;
     bool selected = false;
     float width, height;
@@ -148,6 +145,7 @@ void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<v
         if (texturePath[0] != '\0')
         {
             Texture texture = LoadTexture(texturePath);
+            texture.position = camera.ScreenToWorld(glm::vec2(windowWidth / 2.0f, windowHeight / 2.0f), windowWidth, windowHeight);
 
             if (texture.id != 0)
             {
@@ -381,7 +379,7 @@ int main()
             {
                 double xpos, ypos;
                 glfwGetCursorPos(window, &xpos, &ypos);
-                glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos,(float)ypos), windowWidth, windowHeight);
+                glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
 
                 strokes.erase(std::remove_if(strokes.begin(), strokes.end(), [&](const Stroke &s)
                                              {
@@ -412,7 +410,7 @@ int main()
         {
             double xpos, ypos;
             glfwGetCursorPos(window, &xpos, &ypos);
-            glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos,(float)ypos), windowWidth, windowHeight);
+            glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
 
             if (leftMouseDown && !selection)
             {
