@@ -2,7 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include "shader.h"
-#include "camera.h"
+#include "camera2d.h"
 #include <stb_image.h>
 #include <filesystem.h>
 #include <gui.h>
@@ -27,6 +27,7 @@ const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 int windowWidth = SCR_WIDTH;
 int windowHeight = SCR_HEIGHT;
+Camera2D camera(glm::vec2(400.0f, 300.0f), 1.0f);
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -122,7 +123,7 @@ struct Texture
     unsigned int id;
     bool selected = false;
     float width, height;
-    float scaleValue =1;
+    float scaleValue = 1;
 };
 
 Texture LoadTexture(const char *path);
@@ -395,7 +396,7 @@ int main()
                                 {
                                     return true;
                                 }
-                            }
+                            }      
                             return false; }),
                               strokes.end());
             }
@@ -405,9 +406,11 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // rendering commands here
-        glm::mat4 projection = glm::ortho(0.0f, (float)windowWidth, (float)windowHeight, 0.0f);
+        glm::mat4 projection = camera.GetProjectionMatrix(windowWidth, windowHeight);
+        glm::mat4 view = camera.GetViewMatrix();
         shader.use();
         shader.setMat4("projection", projection);
+        shader.setMat4("view", view);
         if (currentmode == Mode::Select)
         {
             double xpos, ypos;
@@ -516,6 +519,7 @@ int main()
                     selectShader.use();
                     selectShader.setMat4("model", model);
                     selectShader.setMat4("projection", projection);
+                    selectShader.setMat3("view", view);
 
                     glBindVertexArray(selectVAO);
                     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
@@ -610,6 +614,7 @@ int main()
 
             selectedShader.setMat4("model", model);
             selectedShader.setMat4("projection", projection);
+            selectedShader.setMat4("view", view);
 
             glBindVertexArray(selectedVAO);
 
@@ -638,8 +643,9 @@ int main()
             imgShader.use();
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, glm::vec3(texture.position, 0.0f));
-            model = glm::scale(model, glm::vec3(texture.width * texture.scaleValue , texture.height * texture.scaleValue, 1.0f));
+            model = glm::scale(model, glm::vec3(texture.width * texture.scaleValue, texture.height * texture.scaleValue, 1.0f));
             imgShader.setMat4("projection", projection);
+            imgShader.setMat4("view", view);
             imgShader.setMat4("model", model);
             glBindVertexArray(quadVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
