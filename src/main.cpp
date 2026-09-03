@@ -687,6 +687,7 @@ GLFWwindow *startGLFW(int width, int height, const char *title,
     glfwSetMouseButtonCallback(window, button_cb);
     glfwSetCursorPosCallback(window, mouse_cb);
     glfwSetKeyCallback(window, key_cb);
+    glfwSetFramebufferSizeCallback(window, fb_cb);
 
     return window;
 }
