@@ -14,14 +14,14 @@
 #include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void window_size_callback(GLFWwindow* window, int width, int height);
+void window_size_callback(GLFWwindow *window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb ,GLFWmousebuttonfun button_cb, GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
+GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb, GLFWmousebuttonfun button_cb, GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -501,7 +501,7 @@ int main()
                     glDisable(GL_DEPTH_TEST);
                     double xpos, ypos;
                     glfwGetCursorPos(window, &xpos, &ypos);
-                    selectionEnd = glm::vec2(xpos, ypos);
+                    selectionEnd = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
 
                     glm::vec2 center = (selectionStart + selectionEnd) * 0.5f;
                     glm::vec2 size = glm::abs(selectionEnd - selectionStart);
@@ -516,7 +516,7 @@ int main()
                     selectShader.use();
                     selectShader.setMat4("model", model);
                     selectShader.setMat4("projection", projection);
-                    selectShader.setMat3("view", view);
+                    selectShader.setMat4("view", view);
 
                     glBindVertexArray(selectVAO);
                     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
@@ -768,8 +768,7 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
     glViewport(0, 0, width, height);
 }
 
-
-void window_size_callback(GLFWwindow* window, int width, int height)
+void window_size_callback(GLFWwindow *window, int width, int height)
 {
     windowWidth = width;
     windowHeight = height;
@@ -798,7 +797,8 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             double xpos, ypos;
             std::cout << "left mouse presed\n";
             glfwGetCursorPos(window, &xpos, &ypos);
-            selectionStart = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);;
+            selectionStart = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
+            ;
             selectionEnd = selectionStart;
             Stroke currentStroke;
             strokes.push_back(currentStroke);
