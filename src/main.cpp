@@ -797,11 +797,19 @@ void mouse_button_callback(GLFWwindow *window, int button, int action, int mods)
             double xpos, ypos;
             std::cout << "left mouse presed\n";
             glfwGetCursorPos(window, &xpos, &ypos);
-            selectionStart = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
+            glm::vec2 mousePos = camera.ScreenToWorld(glm::vec2((float)xpos, (float)ypos), windowWidth, windowHeight);
             ;
-            selectionEnd = selectionStart;
-            Stroke currentStroke;
-            strokes.push_back(currentStroke);
+            if (currentmode == Mode::Draw)
+            {
+                Stroke currentStroke;
+                strokes.push_back(currentStroke);
+            }
+
+            if (currentmode == Mode::Select)
+            {
+                selectionStart = mousePos;
+                selectionEnd = mousePos;
+            }
         }
         else if (action == GLFW_RELEASE)
         {
