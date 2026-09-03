@@ -14,20 +14,22 @@
 #include <glm/gtc/type_ptr.hpp>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
+void window_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow *window, double xpos, double ypos);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 void mouse_button_callback(GLFWwindow *window, int button, int action, int mods);
 void cursor_position_callback(GLFWwindow *window, double xpos, double ypos);
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb, GLFWmousebuttonfun button_cb, GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
+GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffersizefun fb_cb ,GLFWmousebuttonfun button_cb, GLFWcursorposfun mouse_cb, GLFWkeyfun key_cb);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 int windowWidth = SCR_WIDTH;
 int windowHeight = SCR_HEIGHT;
-Camera2D camera(glm::vec2(400.0f, 300.0f), 1.0f);
+
+Camera2D camera(glm::vec2(0), 1.0f);
 
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
@@ -688,6 +690,7 @@ GLFWwindow *startGLFW(int width, int height, const char *title,
     glfwSetCursorPosCallback(window, mouse_cb);
     glfwSetKeyCallback(window, key_cb);
     glfwSetFramebufferSizeCallback(window, fb_cb);
+    glfwSetWindowSizeCallback(window, window_size_callback);
 
     return window;
 }
@@ -761,8 +764,13 @@ void processInput(GLFWwindow *window)
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    glViewport(0, 0, width, height);
 
+    glViewport(0, 0, width, height);
+}
+
+
+void window_size_callback(GLFWwindow* window, int width, int height)
+{
     windowWidth = width;
     windowHeight = height;
 }
