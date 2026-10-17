@@ -23,7 +23,5 @@ git submodule update --init --recursive
 ### 3. Build and Run
 Configure the project with CMake, compile, and run the executable:
 ```bash
-cmake -S . -B build/
-cd build
-make && ./prog
+make run
 ```
