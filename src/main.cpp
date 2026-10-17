@@ -306,11 +306,11 @@ int main()
     glBindVertexArray(0);
 
     // build and compile the shader program
-    Shader shader("../src/shaders/shader.vs", "../src/shaders/shader.fs");
-    Shader selectShader("../src/shaders/selectShader.vs", "../src/shaders/selectShader.fs");
-    Shader selectedShader("../src/shaders/selectedShader.vs", "../src/shaders/selectedShader.fs");
-    Shader cursorShader("../src/shaders/cursorShader.vs", "../src/shaders/cursorShader.fs");
-    Shader imgShader("../src/shaders/imgShader.vs", "../src/shaders/imgShader.fs");
+    Shader shader((std::string(logl_root) + "/src/shaders/shader.vs").c_str(), (std::string(logl_root) + "/src/shaders/shader.fs").c_str());
+    Shader selectShader((std::string(logl_root) + "/src/shaders/selectShader.vs").c_str(), (std::string(logl_root) + "/src/shaders/selectShader.fs").c_str());
+    Shader selectedShader((std::string(logl_root) + "/src/shaders/selectedShader.vs").c_str(), (std::string(logl_root) + "/src/shaders/selectedShader.fs").c_str());
+    Shader cursorShader((std::string(logl_root) + "/src/shaders/cursorShader.vs").c_str(), (std::string(logl_root) + "/src/shaders/cursorShader.fs").c_str());
+    Shader imgShader((std::string(logl_root) + "/src/shaders/imgShader.vs").c_str(), (std::string(logl_root) + "/src/shaders/imgShader.fs").c_str());
 
     imgShader.use();
     imgShader.setInt("texture.textureId", 0);
