@@ -133,6 +133,7 @@ void clear()
 {
     strokes.clear();
     textures.clear();
+    hasSelectedArea = false;
 }
 
 void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<void()> &clear)
