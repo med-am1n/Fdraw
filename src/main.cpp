@@ -129,15 +129,38 @@ Texture LoadTexture(const char *path);
 std::vector<Stroke> strokes;
 std::vector<Texture> textures;
 
+unsigned int selectVBO, selectEBO, selectVAO;
+unsigned int selectedVAO, selectedVBO;
+unsigned int quadVAO, quadVBO;
+
 void clear()
-{
-    
+{   
     strokes.clear();
     for(Texture &t : textures){
       glDeleteTextures(1, &t.id);
     }
     textures.clear();
     hasSelectedArea = false;
+}
+
+void clean_up(){
+
+    glDeleteBuffers(1, &circleMesh.VBO);
+    glDeleteVertexArrays(1, &circleMesh.VAO);
+    
+    glDeleteBuffers(1, &selectVBO);
+    glDeleteBuffers(1, &selectEBO);
+    glDeleteVertexArrays(1, &selectVAO);
+
+    glDeleteBuffers(1, &selectedVBO);
+    glDeleteVertexArrays(1, &selectedVAO);
+    
+    glDeleteBuffers(1, &quadVBO);
+    glDeleteVertexArrays(1, &quadVAO);
+    
+    for(Texture &t : textures){
+      glDeleteTextures(1, &t.id);
+    }
 }
 
 void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<void()> &clear)
@@ -247,7 +270,6 @@ int main()
     Gui::Init(window);
 
     // select rectangle
-    unsigned int selectVBO, selectEBO, selectVAO;
 
     float vertices[] = {
         -0.5f, -0.5f, 0.0f,
@@ -277,7 +299,6 @@ int main()
     glBindVertexArray(0);
 
     // slected Area rectangle
-    unsigned int selectedVAO, selectedVBO;
     glGenVertexArrays(1, &selectedVAO);
     glGenBuffers(1, &selectedVBO);
     glBindVertexArray(selectedVAO);
@@ -298,7 +319,6 @@ int main()
         -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
         -1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
 
-    unsigned int quadVAO, quadVBO;
     glGenVertexArrays(1, &quadVAO);
     glGenBuffers(1, &quadVBO);
     glBindVertexArray(quadVAO);
@@ -751,8 +771,10 @@ Texture LoadTexture(const char *path)
 
 void processInput(GLFWwindow *window)
 {
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, true);
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS){
+      clean_up();
+      glfwSetWindowShouldClose(window, true);
+    }
 
     if (glfwGetKey(window, GLFW_KEY_BACKSPACE) == GLFW_PRESS)
     {
