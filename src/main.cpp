@@ -633,10 +633,11 @@ int main()
                 p.Draw(shader);
             }
         }
-
+        
+        unsigned int i = 0 ;
         for (const auto &texture : textures)
         {
-            glActiveTexture(GL_TEXTURE0);
+            glActiveTexture(GL_TEXTURE0 + i);
             glBindTexture(GL_TEXTURE_2D, texture.id);
             imgShader.use();
             glm::mat4 model = glm::mat4(1.0f);
@@ -648,6 +649,7 @@ int main()
             glBindVertexArray(quadVAO);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
+            i++;
         }
         // imgui
         Gui::EndFrame();
