@@ -30,8 +30,14 @@ GLFWwindow *startGLFW(int width, int height, const char *title, GLFWframebuffers
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
+
+// logical window size
 int windowWidth = SCR_WIDTH;
 int windowHeight = SCR_HEIGHT;
+
+// frame buffer size
+int frameBufferWidth = SCR_WIDTH;
+int frameBufferHeight = SCR_HEIGHT;
 
 Camera2D camera(glm::vec2(0), 1.0f);
 
@@ -170,16 +176,16 @@ void clean_up(){
 
 void save_img(const char* filename){
   
-  std::vector<unsigned char> pixels(windowWidth * windowHeight * 4);
+  std::vector<unsigned char> pixels(frameBufferWidth * frameBufferHeight * 4);
   
-  glReadPixels(0,0, windowWidth, windowHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+  glReadPixels(0,0, frameBufferWidth, frameBufferHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
   
   std::cout<<"filename : "<<filename<<std::endl;
 
   // OpenGl Coordinate sys starts at botoom-left, standard image format starts at top-left! 
   stbi_flip_vertically_on_write(true);
 
-  int success = stbi_write_png(filename, windowWidth, windowHeight, 4,  pixels.data(), windowWidth*4);
+  int success = stbi_write_png(filename, frameBufferWidth, frameBufferHeight, 4,  pixels.data(), frameBufferWidth*4);
 
   if(success){
     std::cout<<"Iamge saved successfully"<<std::endl;
@@ -193,7 +199,9 @@ void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<v
 {
     ImGui::Begin("Menu");
 
-   ImGui::Text("window : %.0f x %.0f", (float)windowWidth, (float)windowHeight); 
+    ImGui::Text("window : %.0f x %.0f", (float)windowWidth, (float)windowHeight); 
+    ImGui::SameLine();
+    ImGui::Text("framebuffer : %.0f x %.0f", (float)frameBufferWidth, (float)frameBufferHeight);
 
     ImGui::Separator(); 
     
@@ -844,7 +852,8 @@ void processInput(GLFWwindow *window)
 // ---------------------------------------------------------------------------------------------
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-
+    frameBufferWidth = width;
+    frameBufferHeight = height;
     glViewport(0, 0, width, height);
 }
 
