@@ -131,7 +131,11 @@ std::vector<Texture> textures;
 
 void clear()
 {
+    
     strokes.clear();
+    for(Texture &t : textures){
+      glDeleteTextures(1, &t.id);
+    }
     textures.clear();
     hasSelectedArea = false;
 }
