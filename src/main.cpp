@@ -544,7 +544,28 @@ int main()
                             std::cout << "textureSelected = " << texture.selected << std::endl;
                         }
                     }
+                    
+                    // select by click
+                    for (auto &texture : textures)
+                    {
+                        float left = texture.position.x - texture.width * texture.scaleValue * 0.5f;
+                        float right = texture.position.x + texture.width * texture.scaleValue * 0.5f;
+                        float top = texture.position.y - texture.height * texture.scaleValue * 0.5f;
+                        float bottom = texture.position.y + texture.height * texture.scaleValue * 0.5f;
 
+                        bool mouseOver =
+                            mousePos.x >= left &&
+                            mousePos.x <= right &&
+                            mousePos.y >= top &&
+                            mousePos.y <= bottom;
+
+                        if (mouseOver)
+                        {
+                            texture.selected = true;
+                            std::cout << "textureSelected = " << texture.selected << std::endl;
+                        }
+                    }
+                    
                     for (Stroke &s : strokes)
                     {
                         s.selected = true;
