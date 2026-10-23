@@ -128,6 +128,7 @@ Texture LoadTexture(const char *path);
 
 std::vector<Stroke> strokes;
 std::vector<Texture> textures;
+std::vector<GLuint> textureIDs;
 
 unsigned int selectVBO, selectEBO, selectVAO;
 unsigned int selectedVAO, selectedVBO;
@@ -151,8 +152,15 @@ void clean_up(){
     GLuint vaos[4] = {circleMesh.VAO, selectVAO, selectedVAO, quadVAO };
     glDeleteVertexArrays(4, vaos);
     
-    for(Texture &t : textures){
-      glDeleteTextures(1, &t.id);
+    std::vector<GLuint> textureIDs;
+    textureIDs.reserve(textures.size());
+
+    for (const Texture &t : textures) {
+        textureIDs.push_back(t.id);
+    }
+
+    if (!textureIDs.empty()) {
+        glDeleteTextures(static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
     }
 }
 
