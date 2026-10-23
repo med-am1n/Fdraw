@@ -135,12 +135,21 @@ unsigned int selectedVAO, selectedVBO;
 unsigned int quadVAO, quadVBO;
 
 void clear()
-{   
-    strokes.clear();
-    for(Texture &t : textures){
-      glDeleteTextures(1, &t.id);
+{     
+    std::vector<GLuint> textureIDs;
+    textureIDs.reserve(textures.size());
+
+    for (const Texture &t : textures) {
+        textureIDs.push_back(t.id);
     }
+
+    if (!textureIDs.empty()) {
+        glDeleteTextures(static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
+    }
+    
+    strokes.clear();
     textures.clear();
+    textureIDs.clear();
     hasSelectedArea = false;
 }
 
@@ -152,16 +161,7 @@ void clean_up(){
     GLuint vaos[4] = {circleMesh.VAO, selectVAO, selectedVAO, quadVAO };
     glDeleteVertexArrays(4, vaos);
     
-    std::vector<GLuint> textureIDs;
-    textureIDs.reserve(textures.size());
-
-    for (const Texture &t : textures) {
-        textureIDs.push_back(t.id);
-    }
-
-    if (!textureIDs.empty()) {
-        glDeleteTextures(static_cast<GLsizei>(textureIDs.size()), textureIDs.data());
-    }
+    clear();
 }
 
 void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<void()> &clear)
