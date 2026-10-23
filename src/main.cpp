@@ -145,18 +145,11 @@ void clear()
 
 void clean_up(){
 
-    glDeleteBuffers(1, &circleMesh.VBO);
-    glDeleteVertexArrays(1, &circleMesh.VAO);
+    GLuint buffers[5] = {circleMesh.VBO, selectVBO, selectedVBO, quadVBO, selectEBO};
+    glDeleteBuffers(5, buffers);
     
-    glDeleteBuffers(1, &selectVBO);
-    glDeleteBuffers(1, &selectEBO);
-    glDeleteVertexArrays(1, &selectVAO);
-
-    glDeleteBuffers(1, &selectedVBO);
-    glDeleteVertexArrays(1, &selectedVAO);
-    
-    glDeleteBuffers(1, &quadVBO);
-    glDeleteVertexArrays(1, &quadVAO);
+    GLuint vaos[4] = {circleMesh.VAO, selectVAO, selectedVAO, quadVAO };
+    glDeleteVertexArrays(4, vaos);
     
     for(Texture &t : textures){
       glDeleteTextures(1, &t.id);
