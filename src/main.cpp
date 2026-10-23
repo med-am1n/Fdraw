@@ -1,8 +1,11 @@
 #include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "imgui.h"
 #include "shader.h"
 #include "camera2d.h"
+#include "stb_image_write.h"
+#include <ostream>
 #include <stb_image.h>
 #include <filesystem.h>
 #include <gui.h>
@@ -12,6 +15,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <vector>
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void window_size_callback(GLFWwindow *window, int width, int height);
@@ -164,9 +168,35 @@ void clean_up(){
     clear();
 }
 
+void save_img(const char* filename){
+  
+  std::vector<unsigned char> pixels(windowWidth * windowHeight * 4);
+  
+  glReadPixels(0,0, windowWidth, windowHeight, GL_RGBA, GL_UNSIGNED_BYTE, pixels.data());
+  
+  std::cout<<"filename : "<<filename<<std::endl;
+
+  // OpenGl Coordinate sys starts at botoom-left, standard image format starts at top-left! 
+  stbi_flip_vertically_on_write(true);
+
+  int success = stbi_write_png(filename, windowWidth, windowHeight, 4,  pixels.data(), windowWidth*4);
+
+  if(success){
+    std::cout<<"Iamge saved successfully"<<std::endl;
+  }else{
+    std::cout<<"Error Saving the image"<<std::endl;
+  }
+
+}
+
 void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<void()> &clear)
 {
     ImGui::Begin("Menu");
+
+   ImGui::Text("window : %.0f x %.0f", (float)windowWidth, (float)windowHeight); 
+
+    ImGui::Separator(); 
+    
     static char texturePath[512] = "";
 
     ImGui::InputText("Image Path", texturePath, sizeof(texturePath));
@@ -186,6 +216,14 @@ void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<v
     }
 
     ImGui::Separator();
+    
+
+    if (ImGui::Button("Save"))
+    {
+      save_img((std::string(logl_root) + "/image.png").c_str());
+    }
+
+    ImGui::SameLine();
 
     if (ImGui::Button("Clear"))
     {
