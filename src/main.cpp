@@ -224,15 +224,18 @@ void DrawMenu(Mode &mode, float &radius, glm::vec4 &color, const std::function<v
     }
 
     ImGui::Separator();
+    static char imagePath[512] = ""; 
+    ImGui::InputText("Save as (path/imageName.png)", imagePath, sizeof(imagePath));
+    ImGui::SameLine();
     
-
     if (ImGui::Button("Save"))
     {
-      save_img((std::string(logl_root) + "/image.png").c_str());
+      save_img(imagePath);
     }
 
-    ImGui::SameLine();
 
+    ImGui::Separator();
+    
     if (ImGui::Button("Clear"))
     {
         clear();
