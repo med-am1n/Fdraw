@@ -735,10 +735,11 @@ Texture LoadTexture(const char *path)
         std::cout << "Failed to load texture: " << path << std::endl;
         stbi_image_free(data);
     }
-    Texture texture;
-    texture.id = textureID;
-    texture.width = width / 10;
-    texture.height = height / 10;
+    Texture texture{
+    .id = textureID,
+    .width = (float)width / 10,
+    .height = (float)height / 10
+    };
     return texture;
 }
 
