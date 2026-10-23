@@ -458,7 +458,7 @@ int main()
                 {
                     if (leftMouseDown && !selection)
                     {
-                        std::cout << "click in slected Area\n";
+                        //std::cout << "click in slected Area\n";
                         glm::vec2 delta = mousePos - previousMousePos;
                         for (Stroke &s : strokes)
                         {
@@ -502,26 +502,6 @@ int main()
                     for (auto &texture : textures)
                     {
                         texture.selected = false;
-                    }
-
-                    for (auto &texture : textures)
-                    {
-                        float left = texture.position.x - texture.width * texture.scaleValue * 0.5f;
-                        float right = texture.position.x + texture.width * texture.scaleValue * 0.5f;
-                        float top = texture.position.y - texture.height * texture.scaleValue * 0.5f;
-                        float bottom = texture.position.y + texture.height * texture.scaleValue * 0.5f;
-
-                        bool mouseOver =
-                            mousePos.x >= left &&
-                            mousePos.x <= right &&
-                            mousePos.y >= top &&
-                            mousePos.y <= bottom;
-
-                        if (mouseOver)
-                        {
-                            texture.selected = true;
-                            std::cout << "textureSelected = " << texture.selected << std::endl;
-                        }
                     }
 
                     glDisable(GL_DEPTH_TEST);
@@ -582,6 +562,23 @@ int main()
                                 break;
                             }
                         }
+                    }
+                    
+
+                    for (auto &texture : textures)
+                        {
+                            if (texture.selected)
+                            {
+                                minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width * texture.scaleValue);
+                                minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height * texture.scaleValue);
+
+                                maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width * texture.scaleValue);
+                                maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height * texture.scaleValue);
+                            }
+                      }
+
+                    for(auto &s : strokes)
+                    {
                         if (s.selected)
                         {
                             hasSelectedArea = true;
@@ -592,17 +589,6 @@ int main()
 
                                 maxSelectedArea.x = std::max(maxSelectedArea.x, p.position.x + p.radius);
                                 maxSelectedArea.y = std::max(maxSelectedArea.y, p.position.y + p.radius);
-                            }
-                        }
-                        for (auto &texture : textures)
-                        {
-                            if (texture.selected)
-                            {
-                                minSelectedArea.x = std::min(minSelectedArea.x, texture.position.x - texture.width * texture.scaleValue);
-                                minSelectedArea.y = std::min(minSelectedArea.y, texture.position.y - texture.height * texture.scaleValue);
-
-                                maxSelectedArea.x = std::max(maxSelectedArea.x, texture.position.x + texture.width * texture.scaleValue);
-                                maxSelectedArea.y = std::max(maxSelectedArea.y, texture.position.y + texture.height * texture.scaleValue);
                             }
                         }
                     }
