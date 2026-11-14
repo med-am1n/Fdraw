@@ -1,23 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 project(Fdraw)
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-cmake_minimum_required(VERSION 3.10)
-
 set(CMAKE_CXX_STANDARD 17)
 
-list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew")
-
-
-configure_file(
-    ${CMAKE_SOURCE_DIR}/includes/root_directory.h.in
-    ${CMAKE_BINARY_DIR}/generated/root_directory.h
-)
-
-
-find_package(glfw3 REQUIRED)
-
-find_package(assimp REQUIRED)
 
 set(IMGUI_SOURCES
     external/imgui/imgui.cpp
@@ -35,6 +21,11 @@ add_executable(app
     ${IMGUI_SOURCES}
 )
 
+configure_file(
+    ${CMAKE_SOURCE_DIR}/includes/root_directory.h.in
+    ${CMAKE_BINARY_DIR}/generated/root_directory.h
+)
+
 target_include_directories(app PRIVATE
     external/glad/include
     external/glm
@@ -43,11 +34,10 @@ target_include_directories(app PRIVATE
     ${CMAKE_BINARY_DIR}/generated
 )
 
-target_link_libraries(app
+find_package(OpenGL REQUIRED)
+find_package(glfw3 REQUIRED)
+
+target_link_libraries(app PRIVATE
     glfw
-    assimp::assimp
-    "-framework OpenGL"
-    "-framework Cocoa"
-    "-framework IOKit"
-    "-framework CoreVideo"
-)
+    OpenGL::GL
+  )
