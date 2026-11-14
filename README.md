@@ -4,6 +4,11 @@ Drawing application built with C++ and OpenGL.
 
 ![Demo](demo.png)
 
+## Dependencies
+    - OpenGL APIs: gl:core=3.3
+    - glad 3.3
+    - C++17
+
 ## Getting Started
 
 ### 1. Clone the Repository
